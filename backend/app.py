@@ -17,10 +17,34 @@ conn = mysql.connector.connect(
 def home():
     return "Flask is connected to MySQL!"
 
+@app.route('/Songs', methods=['GET'])
+def get_songs():
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Songs LIMIT 200;")
+    data = cursor.fetchall()
+    cursor.close()
+    return jsonify(data)
+
+@app.route('/Artists', methods=['GET'])
+def get_artists():
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Artists LIMIT 200;")
+    data = cursor.fetchall()
+    cursor.close()
+    return jsonify(data)
+
+@app.route('/Albums', methods=['GET'])
+def get_albums():
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Albums LIMIT 200;")
+    data = cursor.fetchall()
+    cursor.close()
+    return jsonify(data)
+
 @app.route('/data', methods=['GET'])
 def get_data():
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Artists LIMIT 30;")  # Change table name
+    cursor.execute("SELECT * FROM song LIMIT 200;")  # Change table name
     data = cursor.fetchall()
     cursor.close()
     return jsonify(data)  # Returns JSON response
