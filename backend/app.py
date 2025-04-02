@@ -7,10 +7,10 @@ CORS(app)  # Enable CORS for frontend access
 
 # MySQL Database Connection
 conn = mysql.connector.connect(
-    host="localhost",  
-    user="root",  
-    password="",  
-    database="practiceDB"  
+    host="musicreview.c1comakqsr9e.us-east-2.rds.amazonaws.com",  
+    user="GregElDeiry",  
+    password="COP4710gce22",  
+    database="musicreview"  
 )
 
 @app.route('/')
@@ -20,7 +20,7 @@ def home():
 @app.route('/data', methods=['GET'])
 def get_data():
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM spotifydatasetPractice LIMIT 10;")  # Change table name
+    cursor.execute("SELECT * FROM Artists LIMIT 30;")  # Change table name
     data = cursor.fetchall()
     cursor.close()
     return jsonify(data)  # Returns JSON response
