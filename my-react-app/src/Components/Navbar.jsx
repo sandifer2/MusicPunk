@@ -13,6 +13,9 @@ export function Navbar() {
             <Link to="/Page2">
                 <button>Page 2</button>
             </Link>
+            <Link to="/Profile">
+                <button>Profile</button>
+            </Link>
         </>
     );
 }
