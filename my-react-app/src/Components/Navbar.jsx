@@ -9,6 +9,10 @@ export function Navbar() {
             <Link to="/Page1">
                 <button>Page1</button>
             </Link>
+
+            <Link to="/Page2">
+                <button>Page 2</button>
+            </Link>
         </>
     );
 }
