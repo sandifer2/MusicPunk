@@ -1,0 +1,41 @@
+.nav-container {
+    display: flex;
+    flex-direction: column;   /* Stack children vertically */
+    position: fixed;          /* Stick to left side of screen */
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 200px;             /* Adjust width as needed */
+    background-color: #1ED760; /* Optional background */
+    padding-top: 50px;
+  }
+
+
+.NavBarButtons{
+
+
+        transition: all .4s ease;
+        color: #fff;
+        border: 3px solid black;
+        font-family:'Montserrat', sans-serif;
+        text-transform: uppercase;
+        text-align:left;
+        line-height: 1;
+        font-size: 17px;
+        background-color : transparent;
+        padding: 20px;
+        outline: none;
+        border-radius: 50px;
+      }
+      
+.NavBarButtons:hover {
+    color: #1ED760;
+    background-color: #000000;
+}
+
+.NavBarButtons:active{
+    color: rgb(236, 27, 205);
+    background-color: #000000;
+
+}
+

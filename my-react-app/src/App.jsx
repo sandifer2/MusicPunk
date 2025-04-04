@@ -1,5 +1,5 @@
 import { useState } from "react";
-import './App.css'
+import './CSS/App.css'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './Layout';
 import Home from './Pages/Home';

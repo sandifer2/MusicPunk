@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom"
 import Table from "./Table";
-import "../Home.css"; //  Import the CSS
+import "../CSS/Home.css"; //  Import the CSS
 
 
 function Home() {
