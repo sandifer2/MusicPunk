@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask import request
 from flask_cors import CORS
 import mysql.connector
 
@@ -12,6 +13,27 @@ conn = mysql.connector.connect(
     password="COP4710gce22",  
     database="musicreview"  
 )
+@app.route('/api/songs', methods=['GET'])
+def search_songs():
+    try:
+        query = request.args.get('search', '')
+        cursor = conn.cursor(dictionary=True)
+        like_query = f"%{query}%"
+        sql = """
+            SELECT Songs.Title, Artists.Artist_Name
+            FROM Songs
+            JOIN Artists ON Songs.Artist_ID = Artists.Artist_ID
+            WHERE Songs.Title LIKE %s OR Artists.Artist_Name LIKE %s
+            LIMIT 100
+        """  
+        
+        cursor.execute(sql, (like_query,like_query)) 
+        results = cursor.fetchall() 
+        cursor.close() 
+        return jsonify(results)
+    except Exception as e:
+            print("Error in /api/songs route:", e)  # Log the error
+            return jsonify({"error": str(e)}), 500
 
 @app.route('/')
 def home():
