@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom"
 import Table from "./Table";
+import '../CSS/Home.css'
 
 function Home() {
+
+
     const [selectedCategory, setSelectedCategory] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [songs, setSongs] = useState([]);
@@ -24,48 +27,65 @@ function Home() {
                 console.error("Error fetching songs:", error);
             });
     };
+
+
+
+
+
     return (
-        <div style={{ textAlign: "center", fontFamily: "Arial, sans-serif", color: "white", backgroundColor: "#181818", height: "100vh", paddingTop: "50px" }}>
-
-            <form onSubmit={handleSearch} className="search-form">
-                <input
-                    type="text"
-                    placeholder="Search for songs"
-                    className="search-input"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <button type="submit" className="search-Button">Search</button>
-            </form>
-
-            {songs.length > 0 && (
-                <div className="search-results">
-                    <h2>Results:</h2>
-                    <ul>
-                        {songs.map((song, index) => (
-                            <li key={index}>
-                                <strong>{song.Artist_Name}</strong> — {song.Title}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-
-            <h1 style={{ fontSize: "2.5rem" }}>Welcome to MusicBox!</h1>
-            <p style={{ fontSize: "1.2rem", marginBottom: "20px" }}>Please select an option you would like to rate:</p>
-
-            {/* Main Buttons */}
-            <div style={{ marginBottom: "40px" }}>
-                <button style={buttonStyle} onClick={() => setSelectedCategory("Artists")}>Artists</button>
-                <button style={buttonStyle} onClick={() => setSelectedCategory("Songs")}>Songs</button>
-                <button style={buttonStyle} onClick={() => setSelectedCategory("Albums")}>Albums</button>
+        <div className="home-container">
+          <form onSubmit={handleSearch} className="search-form">
+            <input
+              type="text"
+              placeholder="Search for songs"
+              className="search-input"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button type="submit" className="search-button">Search</button>
+          </form>
+      
+          {songs.length > 0 && (
+            <div className="search-results">
+              <h2>Results:</h2>
+              <ul>
+                {songs.map((song, index) => (
+                  <li key={index}>
+                    <strong>{song.Artist_Name}</strong> — {song.Title}
+                  </li>
+                ))}
+              </ul>
             </div>
-
-            {/* Table Section */}
-            <Table selectedCategory={selectedCategory} />
+          )}
+      
+          <h1 className="home-title">Welcome to MusicBox!</h1>
+          <p className="home-subtitle">Please select an option you would like to rate:</p>
+      
+          <div className="button-group">
+            <button className="category-button" onClick={() => setSelectedCategory("Artists")}>Artists</button>
+            <button className="category-button" onClick={() => setSelectedCategory("Songs")}>Songs</button>
+            <button className="category-button" onClick={() => setSelectedCategory("Albums")}>Albums</button>
+          </div>
+      
+          <Table selectedCategory={selectedCategory} />
         </div>
-    );
+      );
+
+    
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const buttonStyle = {
     padding: "10px 20px",
