@@ -1,11 +1,11 @@
 .page-container{
-    flex-direction: column;   /* Stack children vertically */
-    position: fixed;          /* Stick to left side of screen */
-    top: 0;
-    left: 0;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    color: white;
+    background-color: #181818;
     height: 100vh;
-    width: 130px;             /* Adjust width as needed */
-    background-color: #1ED760; /* Optional background */
-    padding-top: 50px;
+    padding-top: 30px;
+  
+  
 
 }
