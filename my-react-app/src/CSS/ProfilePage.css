@@ -1,0 +1,12 @@
+.profile-container {
+    background-color: #181818;
+    font-family: Arial, Helvetica, sans-serif;
+  
+    height: 100vh; /* fill the full height of the viewport */
+    width: 100vw;  /* fill the full width of the viewport */
+    color: white;  /* just so you can see text on the dark bg */
+    display: flex; 
+    justify-content: center; 
+    align-items: center; /* center the content vertically and horizontally */
+    flex-direction: column;
+  }
