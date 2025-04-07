@@ -71,5 +71,32 @@ def get_data():
     cursor.close()
     return jsonify(data)  # Returns JSON response
 
+
+
+
+@app.route('/login', methods = ['POST'])
+def login_request():
+    try:
+       data = request.get_json()
+       username = data.get('username')
+       password = data.get('password')
+
+       cursor = conn.cursor(dictionary = True)
+       cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+       user = cursor.fetchone()
+       cursor.close()
+
+       if user and user['password'] == password:
+           return jsonify({"success": True, "message": "Login Successful"})
+       else:
+           return jsonify({"success": False, "message": "Invalid Credentials"}), 401
+       
+    except Exception as e:
+       return jsonify({"success": False, "message": str(e)}), 500
+       
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)

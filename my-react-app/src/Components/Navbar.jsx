@@ -6,7 +6,7 @@ import '../CSS/NavBar.css'
 export function Navbar() {
     return (
         <div className="nav-container">
-            <Link to="/">
+            <Link to="/home">
                 <button className="NavBarButtons">🏠</button>
             </Link>
             <Link to="/Page1">
@@ -18,6 +18,9 @@ export function Navbar() {
             </Link>
             <Link to="/Profile">
                 <button className="NavBarButtons">👤</button>
+            </Link>
+            <Link to="/">
+                <button className="NavBarButtons">Back to login</button>
             </Link>
         </div>
     );
