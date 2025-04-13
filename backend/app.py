@@ -20,20 +20,67 @@ def search_songs():
         cursor = conn.cursor(dictionary=True)
         like_query = f"%{query}%"
         sql = """
-            SELECT Songs.Title, Artists.Artist_Name
+            SELECT 
+                Songs.Title as song_title, 
+                Artists.Artist_Name as artist_name,
+                Albums.Album_Name as album_name
             FROM Songs
             JOIN Artists ON Songs.Artist_ID = Artists.Artist_ID
-            WHERE Songs.Title LIKE %s OR Artists.Artist_Name LIKE %s
+            JOIN Albums ON Songs.Album_ID = Albums.Album_ID
+            WHERE Songs.Title LIKE %s 
+            OR Artists.Artist_Name LIKE %s
+            OR Albums.Album_Name LIKE %s
             LIMIT 100
         """  
         
-        cursor.execute(sql, (like_query,like_query)) 
+        cursor.execute(sql, (like_query, like_query, like_query)) 
         results = cursor.fetchall() 
         cursor.close() 
         return jsonify(results)
     except Exception as e:
-            print("Error in /api/songs route:", e)  # Log the error
-            return jsonify({"error": str(e)}), 500
+        print("Error in /api/songs route:", e)
+        return jsonify({"error": str(e)}), 500
+@app.route('/api/artists', methods=['GET'])
+def search_artists():
+    try: 
+        query = request.args.get('search', '')
+        cursor = conn.cursor(dictionary=True)
+        like_query = f"%{query}%"
+        sql = """
+            SELECT DISTINCT Artist_Name AS artist_name
+            FROM Artists
+            WHERE Artist_Name LIKE %s
+            LIMIT 100
+            """
+        cursor.execute(sql, (like_query,))
+        results = cursor.fetchall()
+        cursor.close()
+        return jsonify(results)
+    except Exception as e:
+        print ("Error in /api/artists route:", e)
+        return jsonify({"error": str(e)}), 500
+@app.route('/api/albums', methods=['GET'])
+def search_albums():
+    try:
+        query = request.args.get('search', '')
+        cursor = conn.cursor(dictionary=True)
+        like_query = f"%{query}%"
+        sql = """
+            SELECT DISTINCT Albums.Album_Name AS album_name
+            FROM Albums
+            WHERE Albums.Album_Name LIKE %s 
+            LIMIT 100;
+
+            """
+        cursor.execute(sql, (like_query, ))
+        results = cursor.fetchall()
+        cursor.close()
+        return jsonify(results)
+    except Exception as e:
+        print("Error in /api/albums route:", e)
+        return jsonify({"error": str(e)}), 500
+    
+
 
 @app.route('/')
 def home():

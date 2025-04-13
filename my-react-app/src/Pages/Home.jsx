@@ -6,16 +6,18 @@ import '../CSS/Home.css'
 function Home() {
 
 
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("songs");
   const [searchQuery, setSearchQuery] = useState("");
-  const [songs, setSongs] = useState([]);
+  const [results, setResults] = useState([]);
+  const [tableCategory, setTableCategory] = useState("");
   const handleSearch = (e) => {
     e.preventDefault()
     if (searchQuery.trim() === "") {
-      setSongs([]); // or show a message saying "Please enter a search term"
+      setResults([]); // or show a message saying "Please enter a search term"
       return;
     }
-    fetch(`http://127.0.0.1:5000/api/songs?search=${encodeURIComponent(searchQuery)}`)
+    const category = selectedCategory || "songs";
+    fetch(`http://127.0.0.1:5000/api/${category}?search=${encodeURIComponent(searchQuery)}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch songs");
@@ -23,7 +25,7 @@ function Home() {
         return response.json();
       })
       .then((data) => {
-        setSongs(data); // save songs from backend to state
+        setResults(data); // save songs from backend to state
         console.log("Fetched songs:", data);
 
       })
@@ -32,30 +34,59 @@ function Home() {
       });
   };
 
-
-
-
-
   return (
     <div className="home-container">
       <form onSubmit={handleSearch} className="search-form">
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="search-dropdown"
+        >
+          <option value="songs">Songs</option>
+          <option value="albums">Albums</option>
+          <option value="artists">Artists</option>
+        </select>
+
         <input
           type="text"
-          placeholder="Search for songs"
+          placeholder="Search..."
           className="search-input"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+
         <button type="submit" className="search-button">Search</button>
       </form>
 
-      {songs.length > 0 && (
+      {results.length > 0 && (
         <div className="search-results">
           <h2>Results:</h2>
           <ul>
-            {songs.map((song, index) => (
+            {results.map((item, index) => (
               <li key={index}>
-                <strong>{song.Artist_Name}</strong> — {song.Title}
+                {selectedCategory === "songs" && (
+                  <>
+                    <strong>{item.artist_name}</strong> — {item.song_title}
+                    <br />
+                    <span className="album-info">Album: {item.album_name}</span>
+                  </>
+                )}
+
+                {selectedCategory === "albums" && (
+                  <>
+                    <strong>{item.album_name}</strong>
+                    <br />
+                    <span className="album-info">By: {item.artist_name}</span>
+                  </>
+                )}
+
+                {selectedCategory === "artists" && (
+                  <>
+                    <strong>{item.artist_name}</strong>
+                    <br />
+                    <span className="album-info">Genre: {item.genre}</span>
+                  </>
+                )}
               </li>
             ))}
           </ul>
@@ -66,30 +97,17 @@ function Home() {
       <p className="home-subtitle">Please select an option you would like to rate:</p>
 
       <div className="button-group">
-        <button className="category-button" onClick={() => setSelectedCategory("Artists")}>Artists</button>
-        <button className="category-button" onClick={() => setSelectedCategory("Songs")}>Songs</button>
-        <button className="category-button" onClick={() => setSelectedCategory("Albums")}>Albums</button>
+        <button className="category-button" onClick={() => setTableCategory("Artists")}>Artists</button>
+        <button className="category-button" onClick={() => setTableCategory("Songs")}>Songs</button>
+        <button className="category-button" onClick={() => setTableCategory("Albums")}>Albums</button>
       </div>
 
-      <Table selectedCategory={selectedCategory} />
+      <Table tableCategory={tableCategory} />
     </div>
   );
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const buttonStyle = {
   padding: "10px 20px",

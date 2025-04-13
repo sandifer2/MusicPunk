@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
 
-function Table({ selectedCategory }) {
+function Table({ tableCategory }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!selectedCategory) return;
+    if (!tableCategory) return;
 
     setLoading(true);
     setError(null);
 
-    fetch(`http://127.0.0.1:5000/${selectedCategory}`)
+    fetch(`http://127.0.0.1:5000/${tableCategory}`)
       .then((response) => response.json())
       .then((json) => setData(json))
       .catch((error) => setError(error.message))
       .finally(() => setLoading(false));
-  }, [selectedCategory]);
+  }, [tableCategory]);
 
   return (
     <div>

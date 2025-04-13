@@ -9,8 +9,8 @@ export function Navbar() {
             <Link to="/home">
                 <button className="NavBarButtons">🏠</button>
             </Link>
-            <Link to="/Page1">
-                <button className="NavBarButtons">Page 1</button>
+            <Link to="/SongReview">
+                <button className="NavBarButtons">Review a Song</button>
             </Link>
 
             <Link to="/Page2">

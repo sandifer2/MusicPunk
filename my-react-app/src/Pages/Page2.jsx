@@ -8,7 +8,7 @@ export default function Page2() {
             {/* <nav>
                 <Link to="/">Home</Link>
                 <br />
-                <Link to="/Page1">Page 1</Link>
+                <Link to="/SongReview">Song Review</Link>
             </nav> */}
         </div>
     );

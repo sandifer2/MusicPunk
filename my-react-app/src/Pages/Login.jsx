@@ -19,23 +19,23 @@ const Login = () => {
         password: password
       })
     })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Failed to login");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      if (data.success) {
-        navigate('/home');
-      } else {
-        alert(data.message);
-      }
-    })
-    .catch((error) => {
-      console.error("Error Logging in:", error);
-      alert("Login failed. Please try again.");
-    });
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to login");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.success) {
+          navigate('/home');
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error Logging in:", error);
+        alert("Login failed. Please try again.");
+      });
   };
 
   return (
@@ -48,18 +48,18 @@ const Login = () => {
           <h2>Sign In</h2>
           <div className="form">
             <div className="inputBox">
-              <input 
-                type="text" 
-                required 
+              <input
+                type="text"
+                required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
               <i>Username</i>
             </div>
             <div className="inputBox">
-              <input 
-                type="password" 
-                required 
+              <input
+                type="password"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />

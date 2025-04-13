@@ -2,9 +2,10 @@
   text-align: center;
   font-family: Arial, sans-serif;
   color: white;
-  background-color: #181818;
-  height: 100vh;
+  min-height: 100vh;
   padding-top: 50px;
+  margin-left: 130px;
+  background-color: #181818;
 }
 
 .search-form {
@@ -37,6 +38,20 @@
 .search-results ul {
   list-style: none;
   padding: 0;
+}
+
+.search-results li {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #282828;
+  border-radius: 5px;
+}
+
+.album-info {
+  color: #b3b3b3;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  display: block;
 }
 
 .home-title {
