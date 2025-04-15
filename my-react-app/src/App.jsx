@@ -8,6 +8,8 @@ import Page2 from "./Pages/Page2";
 import Profile from "./Pages/Profile";
 import Login from "./Pages/Login";
 
+import SongDetails from './Pages/SongDetails';
+
 function App() {
   return (
     <Router>
@@ -18,6 +20,7 @@ function App() {
           <Route path="/SongReview" element={<SongReview />} />
           <Route path="/Page2" element={<Page2 />} />
           <Route path="/Profile" element={<Profile />} />
+          <Route path="/song/:songId" element={<SongDetails />} />
         </Route>
       </Routes>
     </Router>
