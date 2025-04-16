@@ -518,7 +518,6 @@ def submit_song_review():
         # Validate input
         if not all([username, song_id, rating, review_text]):
             return jsonify({"success": False, "message": "Missing required review details"}), 400
-        
         # Validate rating is an integer between 1 and 5
         try:
             rating = int(rating)
@@ -546,6 +545,16 @@ def submit_song_review():
             connection.close()
             return jsonify({"success": False, "message": "Song not found"}), 404
         
+
+        #this checks if you have already reviewed the song 
+        cursor.execute("SELECT * FROM Song_Reviews WHERE reviewer_username = %s AND song_id = %s", (username, song_id))
+        existing_review = cursor.fetchone()
+        if existing_review:
+            cursor.close()
+            connection.close() 
+            return jsonify({"success": False, "message": "You've already reviewed this song"}), 409
+        
+
         # Insert the review
         insert_query = """
         INSERT INTO Song_Reviews 
