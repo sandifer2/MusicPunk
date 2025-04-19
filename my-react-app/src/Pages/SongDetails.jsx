@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useOutletContext } from 'react-router-dom';
 import '../CSS/Page.css';
+import '../CSS/SongDetails.css';
 
 function SongDetails() {
   const { songId } = useParams();
+  const { refreshTokenCount } = useOutletContext();
   console.log("SongDetails component mounted");
   console.log("Song ID from URL params:", songId);
 
@@ -14,8 +16,11 @@ function SongDetails() {
   const [reviewText, setReviewText] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [tokensAvailable, setTokensAvailable] = useState(0);
+  const [unlockCost] = useState(5);
+  const [reviewedSong, setReviewedSong] = useState(null);
 
-  // Fetch song details and reviews when component mounts
   useEffect(() => {
     if (!songId) {
       setError("Song ID is missing");
@@ -24,7 +29,7 @@ function SongDetails() {
     }
 
     console.log("Making API request to:", `http://127.0.0.1:5000/api/song/${songId}`);
-    
+
     // Fetch song details
     fetch(`http://127.0.0.1:5000/api/song/${songId}`)
       .then(response => {
@@ -34,7 +39,6 @@ function SongDetails() {
             console.error("Error data:", errorData);
             throw new Error(`Status: ${response.status}, Message: ${errorData.error || 'Unknown error'}`);
           }).catch(err => {
-            // If can't parse error as JSON
             throw new Error(`Status: ${response.status}`);
           });
         }
@@ -44,26 +48,72 @@ function SongDetails() {
         console.log("Fetched song details:", data);
         setSongDetails(data);
         setLoading(false);
-      })  
+      })
       .catch(error => {
         console.error('Error fetching song details:', error);
         setError(`Failed to load song details: ${error.message}`);
         setLoading(false);
       });
 
-    // Fetch reviews for this song
+    // First check if user has already reviewed this song
+    const username = localStorage.getItem('username');
     fetch(`http://127.0.0.1:5000/api/song_reviews/${songId}`)
       .then(response => response.json())
       .then(data => {
         console.log("Fetched reviews:", data);
         setReviews(data);
+        // Check if the current user has reviewed this song
+        const userReview = data.find(review => review.reviewer_username === username);
+        if (userReview) {
+          setReviewedSong(1);
+          setIsUnlocked(true); // If user has reviewed, they should be able to see the reviews
+        } else {
+          setReviewedSong(0);
+        }
       })
       .catch(error => console.error('Error fetching reviews:', error));
+
+    // Then check unlock status
+    fetch(`http://127.0.0.1:5000/api/check_song_unlock/${songId}?username=${username}`)
+      .then(response => response.json())
+      .then(data => {
+        // Only update isUnlocked if user hasn't reviewed yet
+        if (reviewedSong === 0) {
+          setIsUnlocked(data.is_unlocked);
+        }
+        setTokensAvailable(data.tokens_available);
+      })
+      .catch(error => console.error('Error checking unlock status:', error));
   }, [songId]);
+
+  const handleUnlockSong = () => {
+    const username = localStorage.getItem("username");
+    fetch('http://127.0.0.1:5000/api/unlock_song', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, song_id: songId })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setIsUnlocked(true);
+          setTokensAvailable(data.tokens_remaining);
+          refreshTokenCount();
+          fetchReviews(); // Fetch reviews after unlocking
+          alert("Song unlocked successfully!");
+        } else {
+          alert(data.error || "Failed to unlock song.");
+        }
+      })
+      .catch(error => {
+        console.error("Unlock error:", error);
+        alert("Something went wrong.");
+      });
+  };
 
   const handleSubmitReview = (e) => {
     e.preventDefault();
-    
+
     // Get username from localStorage or use a test username for now
     const username = localStorage.getItem('username') || "testuser";
 
@@ -79,189 +129,158 @@ function SongDetails() {
         review_text: reviewText
       })
     })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        // Refresh reviews or add the new review to the list
-        setReviews([...reviews, {
-          reviewer_username: username,
-          rating: rating,
-          review: reviewText,
-          created_at: new Date().toISOString()
-        }]);
-        
-        // Reset form and close modal
-        setRating(3);
-        setReviewText('');
-        setShowReviewModal(false);
-      } else {
-        alert(data.message);
-      }
-    })
-    .catch(error => {
-      console.error('Error submitting review:', error);
-      alert('Failed to submit review');
-    });
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Refresh reviews or add the new review to the list
+          setReviews([...reviews, {
+            reviewer_username: username,
+            rating: rating,
+            review: reviewText,
+            created_at: new Date().toISOString()
+          }]);
+
+          // Reset form and close modal
+          setRating(3);
+          setReviewText('');
+          setShowReviewModal(false);
+
+          // Update reviewedSong state to indicate user has reviewed
+          setReviewedSong(1);
+
+          // Refresh token count in the top right
+          refreshTokenCount();
+
+          // Show success message with token reward
+          alert(`Review submitted successfully! You earned ${data.tokens_earned} tokens! Your new balance is ${data.new_token_balance} tokens.`);
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error submitting review:', error);
+        alert('Failed to submit review');
+      });
+  };
+
+  const calculateAverageRating = () => {
+    if (reviews.length === 0) return 0;
+    const sum = reviews.reduce((total, review) => total + review.rating, 0);
+    return (sum / reviews.length).toFixed(1);
   };
 
   if (loading) return <div className="page-container"><h2>Loading...</h2></div>;
-  
+
   if (error) return (
-    <div className="page-container">
+    <div className="error-container">
       <h2>Error: {error}</h2>
       <p>Please try again later or contact support if the problem persists.</p>
-      <button 
-        onClick={() => window.location.reload()}
-        style={{ 
-          backgroundColor: '#1DB954', 
-          color: 'white',
-          padding: '10px 20px',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer' 
-        }}
-      >
-        Try Again
-      </button>
+      <button onClick={() => window.location.reload()}>Try Again</button>
     </div>
   );
-  
+
   if (!songDetails) return <div className="page-container"><h2>No song data available</h2></div>;
 
   return (
-    <div className="page-container">
-      <h1>{songDetails.Title}</h1>
-      <p>Artist: {songDetails.Artist_Name}</p>
-      <p>Album: {songDetails.Album_Name}</p>
-
-      <button 
-        onClick={() => setShowReviewModal(true)}
-        style={{
-          backgroundColor: '#1DB954',
-          color: 'white',
-          padding: '10px 20px',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          marginBottom: '20px'
-        }}
-      >
-        Add Review
-      </button>
+    <div className="song-details-container">
+      <h1 className="song-details-title">{songDetails.Title}</h1>
+      <div className="song-details-info">
+        <p>Artist: {songDetails.Artist_Name}</p>
+        <p>Album: {songDetails.Album_Name}</p>
+        {isUnlocked && (
+          <div className="rating-summary">
+            <p className="average-rating">
+              Average Rating: <strong>{calculateAverageRating()}</strong>/5
+              <span className="review-count">({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})</span>
+            </p>
+          </div>
+        )}
+        {isUnlocked && reviewedSong === 0 && (
+          <p className="token-incentive">Add a review to earn 10 tokens!</p>
+        )}
+      </div>
+      {isUnlocked ? (
+        <>
+          {reviewedSong === 0 && (
+            <button className="add-review-button" onClick={() => setShowReviewModal(true)}>
+              Add Review
+            </button>
+          )}
+          {/* Reviews Section - Only shown when unlocked */}
+          <div className="reviews-section">
+            <h2>Reviews</h2>
+            {reviews.length === 0 ? (
+              <p>No reviews yet</p>
+            ) : (
+              <div>
+                {reviews.map((review, index) => (
+                  <div key={index} className="review-card">
+                    <div className="review-header">
+                      <strong>{review.reviewer_username}</strong>
+                      {' '}rated it {review.rating}/5
+                      {review.created_at && (
+                        <span className="review-date">
+                          • {new Date(review.created_at).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    <p className="review-content">{review.review}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="unlock-section">
+          <p>You must unlock this song to view and leave reviews.</p>
+          <p>You have <strong>{tokensAvailable}</strong> tokens.</p>
+          <p>Cost to unlock: <strong>{unlockCost}</strong> tokens</p>
+          <button className="add-review-button" onClick={handleUnlockSong}>
+            Unlock Song
+          </button>
+        </div>
+      )}
 
       {/* Review Modal */}
       {showReviewModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: '#282828',
-            padding: '20px',
-            borderRadius: '10px',
-            width: '300px'
-          }}>
+        <div className="review-modal-overlay">
+          <div className="review-modal">
             <h2>Add Review</h2>
             <form onSubmit={handleSubmitReview}>
-              <div>
+              <div className="review-form-group">
                 <label>Rating:</label>
-                <select 
-                  value={rating} 
-                  onChange={(e) => setRating(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    marginBottom: '10px'
-                  }}
+                <select
+                  value={rating}
+                  onChange={(e) => setRating(Number(e.target.value))}
                 >
-                  {[1,2,3,4,5].map(num => (
+                  {[1, 2, 3, 4, 5].map(num => (
                     <option key={num} value={num}>{num}</option>
                   ))}
                 </select>
               </div>
-              <div>
+              <div className="review-form-group">
                 <label>Review:</label>
-                <textarea 
+                <textarea
                   value={reviewText}
                   onChange={(e) => setReviewText(e.target.value)}
                   required
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    marginBottom: '10px',
-                    minHeight: '100px'
-                  }}
                 />
               </div>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between'
-              }}>
-                <button 
-                  type="submit"
-                  style={{
-                    backgroundColor: '#1DB954',
-                    color: 'white',
-                    padding: '10px 20px',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer'
-                  }}
-                >
+              <div className="review-form-buttons">
+                <button type="submit" className="submit-review-button">
                   Submit Review
                 </button>
-                <button 
+                <button
                   type="button"
                   onClick={() => setShowReviewModal(false)}
-                  style={{
-                    backgroundColor: '#ff4136',
-                    color: 'white',
-                    padding: '10px 20px',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer'
-                  }}
+                  className="cancel-review-button"
                 >
                   Cancel
                 </button>
               </div>
             </form>
           </div>
-        </div>
-      )}
-
-      {/* Reviews Section */}
-      <h2>Reviews</h2>
-      {reviews.length === 0 ? (
-        <p>No reviews yet</p>
-      ) : (
-        <div>
-          {reviews.map((review, index) => (
-            <div 
-              key={index} 
-              style={{
-                backgroundColor: '#282828',
-                padding: '15px',
-                marginBottom: '10px',
-                borderRadius: '5px'
-              }}
-            >
-              <p>
-                <strong>{review.reviewer_username}</strong> 
-                {' '}rated it {review.rating}/5
-                {review.created_at && <span style={{color: '#999', fontSize: '0.8em'}}> • {new Date(review.created_at).toLocaleDateString()}</span>}
-              </p>
-              <p>{review.review}</p>
-            </div>
-          ))}
         </div>
       )}
     </div>

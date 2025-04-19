@@ -1,0 +1,280 @@
+.song-details-container {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    color: white;
+    min-height: 100vh;
+    padding-top: 50px;
+    margin-left: 130px;
+    background-color: #181818;
+}
+
+.song-details-title {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.song-details-info {
+    margin-bottom: 30px;
+    font-size: 1.2rem;
+}
+
+.song-details-info p {
+    margin: 10px 0;
+    color: #b3b3b3;
+}
+
+.add-review-button {
+    background-color: #1DB954;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 30px;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.add-review-button:hover {
+    background-color: #1ed760;
+}
+
+.review-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.review-modal {
+    background-color: #282828;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    color: white;
+}
+
+.review-modal h2 {
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    color: white;
+}
+
+.review-form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.review-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #b3b3b3;
+    font-size: 1rem;
+}
+
+.review-form-group select,
+.review-form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #404040;
+    border-radius: 5px;
+    background-color: #404040;
+    color: white;
+    font-size: 1rem;
+}
+
+.review-form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.review-form-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+}
+
+.submit-review-button,
+.cancel-review-button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    min-width: 120px;
+}
+
+.submit-review-button {
+    background-color: #1DB954;
+}
+
+.submit-review-button:hover {
+    background-color: #1ed760;
+}
+
+.cancel-review-button {
+    background-color: #ff4136;
+}
+
+.cancel-review-button:hover {
+    background-color: #ff5146;
+}
+
+.reviews-section {
+    margin-top: 40px;
+    padding: 0 20px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.reviews-section h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.review-card {
+    background-color: #282828;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.review-header {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.review-header strong {
+    color: #1DB954;
+}
+
+.review-date {
+    color: #999;
+    font-size: 0.9em;
+}
+
+.review-content {
+    color: #b3b3b3;
+    line-height: 1.5;
+}
+
+.error-container {
+    text-align: center;
+    padding: 40px;
+    color: white;
+    margin-left: 130px;
+    background-color: #181818;
+    min-height: 100vh;
+}
+
+.error-container h2 {
+    color: #ff4136;
+    margin-bottom: 20px;
+}
+
+.error-container p {
+    color: #b3b3b3;
+    margin-bottom: 30px;
+}
+
+.error-container button {
+    background-color: #1DB954;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.error-container button:hover {
+    background-color: #1ed760;
+}
+
+.unlock-section {
+    background-color: #282828;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 400px;
+    margin: 30px auto;
+    text-align: center;
+}
+
+.unlock-section h2 {
+    color: white;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.unlock-section p {
+    color: #b3b3b3;
+    margin: 10px 0;
+    font-size: 1.1rem;
+}
+
+.unlock-button {
+    background-color: #1DB954;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.unlock-button:hover:not(:disabled) {
+    background-color: #1ed760;
+}
+
+.unlock-button:disabled {
+    background-color: #404040;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.error-message {
+    color: #ff4136 !important;
+    margin-top: 15px !important;
+    font-size: 0.9rem !important;
+}
+
+.rating-summary {
+    margin: 8px 0;
+    padding: 6px;
+    background-color: #282828;
+    border-radius: 4px;
+}
+
+.average-rating {
+    font-size: 0.9rem;
+    color: #ffffff;
+    margin: 0;
+}
+
+.average-rating strong {
+    color: #1DB954;
+    font-size: 1rem;
+}
+
+.review-count {
+    color: #b3b3b3;
+    font-size: 0.8rem;
+    margin-left: 4px;
+}

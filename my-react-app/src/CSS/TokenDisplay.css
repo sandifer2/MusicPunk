@@ -1,0 +1,23 @@
+.token-display {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #1DB954;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.token-icon {
+    font-size: 1.2em;
+}
+
+.token-count {
+    font-weight: bold;
+    font-size: 1.1em;
+}
