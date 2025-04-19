@@ -563,6 +563,63 @@ def unlock_song():
             connection.close()
         print(f"Error unlocking song: {e}")
         return jsonify({"error": str(e)}), 500
+    
+
+# endpoint to get all reviews for a user
+@app.route('/api/user/reviews', methods=['GET'])
+def get_user_reviews():
+    try:
+        # Get a fresh connection
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        # Get username from query parameters
+        username = request.args.get('username')
+        if not username:
+            return jsonify({"error": "Username is required"}), 400
+        
+        cursor = connection.cursor(dictionary=True)
+        
+        # Query to get all reviews by the user with song details
+        sql = """
+            SELECT 
+                sr.song_review_ID AS review_id,
+                sr.song_ID AS song_id,
+                s.Title AS song_title,
+                a.Artist_Name AS artist_name,
+                al.Album_Name AS album_name,
+                sr.rating,
+                sr.review,
+                sr.created_at
+            FROM Song_Reviews sr
+            JOIN Songs s ON sr.song_ID = s.Spotify_ID
+            JOIN Artists a ON s.Artist_ID = a.Artist_ID
+            JOIN Albums al ON s.Album_ID = al.Album_ID
+            WHERE sr.reviewer_username = %s
+            ORDER BY sr.created_at DESC
+        """
+        
+        cursor.execute(sql, (username,))
+        reviews = cursor.fetchall()
+        
+        cursor.close()
+        connection.close()
+        
+        return jsonify(reviews)
+        
+    except Exception as e:
+        print(f"Error fetching user reviews: {e}")
+        return jsonify({"error": str(e)}), 500
+   
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,18 +1,241 @@
 .profile-container {
-    background-color: #181818;
-    font-family: Arial, Helvetica, sans-serif;
+  background-color: #181818;
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  width: 100%;
+  color: white;
+  padding: 2rem;
+  padding-left: 150px; /* Account for the navbar */
+  box-sizing: border-box;
+}
+
+.profile-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #1DB954;
+}
+
+.profile-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.profile-section {
+  background-color: #282828;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.profile-section h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #1DB954;
+  font-size: 1.8rem;
+}
+
+.review-info {
+  color: #b3b3b3;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.review-card {
+  background-color: #333333;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  border-left: 4px solid transparent;
+}
+
+.review-card.pinned {
+  border-left: 4px solid #1DB954;
+  background-color: #2a2a2a;
+}
+
+.pinned-badge {
+  position: absolute;
+  top: -10px;
+  right: 15px;
+  background-color: #1DB954;
+  color: black;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pin-icon {
+  font-size: 1.1rem;
+}
+
+.review-header {
+  margin-bottom: 1rem;
+}
+
+.song-title {
+  margin: 0;
+  color: white;
+  font-size: 1.3rem;
+  transition: color 0.2s ease;
+}
+
+.song-title:hover {
+  color: #1DB954;
+  text-decoration: underline;
+}
+
+.artist {
+  margin: 5px 0 3px;
+  color: #b3b3b3;
+  font-size: 1rem;
+  font-style: italic;
+}
+
+.album {
+  margin: 0 0 10px;
+  color: #b3b3b3;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.rating {
+  display: inline-block;
+  background-color: #1DB954;
+  color: black;
+  padding: 3px 10px;
+  border-radius: 15px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.review-text {
+  color: #e6e6e6;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.review-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #444;
+  padding-top: 1rem;
+}
+
+.review-date {
+  color: #b3b3b3;
+  font-size: 0.9rem;
+}
+
+.pin-button {
+  background-color: #333;
+  color: white;
+  border: 1px solid #666;
+  border-radius: 20px;
+  padding: 5px 15px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.pin-button:hover {
+  background-color: #444;
+}
+
+.pin-button.pinned {
+  background-color: #1DB954;
+  color: black;
+  border-color: #1DB954;
+}
+
+.pin-button.pinned:hover {
+  background-color: #19a649;
+}
+
+.no-reviews {
+  text-align: center;
+  padding: 3rem 0;
+  color: #b3b3b3;
+}
+
+.no-reviews p {
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+}
+
+.action-button {
+  background-color: #1DB954;
+  color: black;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: #19a649;
+  transform: translateY(-2px);
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 3rem 0;
+  color: #1DB954;
+  font-size: 1.2rem;
+}
+
+.error-message {
+  background-color: rgba(255, 65, 54, 0.2);
+  border-left: 4px solid #ff4136;
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+
+.retry-button {
+  background-color: #ff4136;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 15px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.retry-button:hover {
+  background-color: #e73529;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .profile-container {
+    padding-left: 130px;
+    padding: 1rem;
+  }
   
-    height: 100vh; /* fill the full height of the viewport */
-    width: 100vw;  /* fill the full width of the viewport */
-    color: white;  /* just so you can see text on the dark bg */
-    display: flex; 
-    justify-content: center; 
-    align-items: center; /* center the content vertically and horizontally */
-    flex-direction: column;
+  .profile-section {
+    padding: 1.5rem;
   }
-
-
-
-  .profile-buttons{
-    
+  
+  .review-card {
+    padding: 1.2rem;
   }
+}
