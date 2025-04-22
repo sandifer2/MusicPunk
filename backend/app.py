@@ -81,7 +81,9 @@ def search_artists():
         cursor = connection.cursor(dictionary=True)
         like_query = f"%{query}%"
         sql = """
-            SELECT DISTINCT Artist_Name AS artist_name
+            SELECT 
+                Artist_ID,
+                Artist_Name as artist_name
             FROM Artists
             WHERE Artist_Name LIKE %s
             LIMIT 100
@@ -107,12 +109,16 @@ def search_albums():
         cursor = connection.cursor(dictionary=True)
         like_query = f"%{query}%"
         sql = """
-            SELECT DISTINCT Albums.Album_Name AS album_name
+            SELECT 
+                Album_ID,
+                Album_Name as album_name,
+                Artist_Name as artist_name
             FROM Albums
-            WHERE Albums.Album_Name LIKE %s 
+            WHERE Album_Name LIKE %s 
+            OR Artist_Name LIKE %s
             LIMIT 100;
             """
-        cursor.execute(sql, (like_query, ))
+        cursor.execute(sql, (like_query, like_query))
         results = cursor.fetchall()
         cursor.close()
         connection.close()
@@ -416,6 +422,7 @@ def test_connection():
         print(f"Error testing connection: {e}")
         print(traceback.format_exc())
         return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/api/user/tokens', methods=['GET'])
 def get_user_tokens():
     try:
@@ -440,7 +447,8 @@ def get_user_tokens():
             
     except Exception as e:
         print(f"Error fetching user tokens: {e}")
-        return jsonify({"error": str(e)}), 500 
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/check_song_unlock/<song_id>', methods=['GET'])
 def check_song_unlock(song_id):
     try:
@@ -611,15 +619,201 @@ def get_user_reviews():
     except Exception as e:
         print(f"Error fetching user reviews: {e}")
         return jsonify({"error": str(e)}), 500
-   
 
+@app.route('/api/album/<album_id>', methods=['GET'])
+def get_album_details(album_id):
+    try:
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        cursor = connection.cursor(dictionary=True)
+        sql = """
+            SELECT 
+                Album_ID,
+                Album_Name,
+                Artist_Name
+            FROM Albums
+            WHERE Album_ID = %s
+        """
+        cursor.execute(sql, (album_id,))
+        album = cursor.fetchone()
+        cursor.close()
+        connection.close()
 
+        if album:
+            return jsonify(album)
+        else:
+            return jsonify({"error": "Album not found"}), 404
+    except Exception as e:
+        print(f"Error fetching album details: {e}")
+        return jsonify({"error": str(e)}), 500
 
+@app.route('/api/album_reviews/<album_id>', methods=['GET'])
+def get_album_reviews(album_id):
+    try:
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        cursor = connection.cursor(dictionary=True)
+        sql = """
+            SELECT 
+                reviewer_username,
+                rating,
+                review,
+                created_at
+            FROM Album_Reviews
+            WHERE Album_ID = %s
+            ORDER BY created_at DESC
+        """
+        cursor.execute(sql, (album_id,))
+        reviews = cursor.fetchall()
+        cursor.close()
+        connection.close()
 
+        return jsonify(reviews)
+    except Exception as e:
+        print(f"Error fetching album reviews: {e}")
+        return jsonify({"error": str(e)}), 500
 
+@app.route('/api/artist/<artist_id>', methods=['GET'])
+def get_artist_details(artist_id):
+    try:
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        cursor = connection.cursor(dictionary=True)
+        sql = """
+            SELECT 
+                Artist_ID,
+                Artist_Name
+            FROM Artists
+            WHERE Artist_ID = %s
+        """
+        cursor.execute(sql, (artist_id,))
+        artist = cursor.fetchone()
+        cursor.close()
+        connection.close()
 
+        if artist:
+            return jsonify(artist)
+        else:
+            return jsonify({"error": "Artist not found"}), 404
+    except Exception as e:
+        print(f"Error fetching artist details: {e}")
+        return jsonify({"error": str(e)}), 500
 
+@app.route('/api/artist_reviews/<artist_id>', methods=['GET'])
+def get_artist_reviews(artist_id):
+    try:
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        cursor = connection.cursor(dictionary=True)
+        sql = """
+            SELECT 
+                reviewer_username,
+                rating,
+                review,
+                created_at
+            FROM Artist_Reviews
+            WHERE Artist_ID = %s
+            ORDER BY created_at DESC
+        """
+        cursor.execute(sql, (artist_id,))
+        reviews = cursor.fetchall()
+        cursor.close()
+        connection.close()
 
+        return jsonify(reviews)
+    except Exception as e:
+        print(f"Error fetching artist reviews: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/submit_artist_review', methods=['POST'])
+def submit_artist_review():
+    try:
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+        
+        data = request.get_json()
+    
+        # Extract review details
+        username = data.get('username')
+        artist_id = data.get('artist_id')
+        rating = data.get('rating')
+        review_text = data.get('review_text')
+
+        # Validate input
+        if not all([username, artist_id, rating, review_text]):
+            return jsonify({"success": False, "message": "Missing required review details"}), 400
+        
+        # Validate rating is an integer between 1 and 5
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                return jsonify({"success": False, "message": "Rating must be between 1 and 5"}), 400
+        except ValueError:
+            return jsonify({"success": False, "message": "Invalid rating"}), 400
+
+        cursor = connection.cursor(dictionary=True)
+
+        # Check if user exists
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        user = cursor.fetchone()
+        if not user:
+            cursor.close()
+            connection.close()
+            return jsonify({"success": False, "message": "User not found"}), 404
+
+        # Check if artist exists
+        cursor.execute("SELECT * FROM Artists WHERE Artist_ID = %s", (artist_id,))
+        artist = cursor.fetchone()
+        if not artist:
+            cursor.close()
+            connection.close()
+            return jsonify({"success": False, "message": "Artist not found"}), 404
+
+        # Check if user has already reviewed this artist
+        cursor.execute("SELECT * FROM Artist_Reviews WHERE reviewer_username = %s AND Artist_ID = %s", (username, artist_id))
+        existing_review = cursor.fetchone()
+        if existing_review:
+            cursor.close()
+            connection.close()
+            return jsonify({"success": False, "message": "You've already reviewed this artist"}), 409
+
+        # Insert the review
+        insert_query = """
+        INSERT INTO Artist_Reviews
+        (reviewer_username, Artist_ID, rating, review, created_at)
+        VALUES (%s, %s, %s, %s, NOW())
+        """
+        cursor.execute(insert_query, (username, artist_id, rating, review_text))
+
+        # Commit the transaction
+        connection.commit()
+        
+        cursor.close()
+        connection.close()
+        
+        return jsonify({"success": True, "message": "Review submitted successfully"}), 201
+    
+    except mysql.connector.Error as err:
+        if 'connection' in locals() and connection:
+            connection.rollback()
+            connection.close()
+        print(f"Database error: {err}")
+        return jsonify({"success": False, "message": "Database error occurred"}), 500
+    
+    except Exception as e:
+        if 'connection' in locals() and connection:
+            connection.close()
+        print(f"Unexpected error: {e}")
+        return jsonify({"success": False, "message": "An unexpected error occurred"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
