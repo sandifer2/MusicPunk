@@ -935,5 +935,324 @@ def submit_album_review():
         print(f"Error submitting review: {e}")
         return jsonify({"success": False, "message": str(e)}), 500
 
+@app.route('/api/top-rated-albums', methods=['GET'])
+def get_top_rated_albums():
+    try:
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        cursor = connection.cursor(dictionary=True)
+        
+        # Query to find albums with high average ratings (4.0 or above) and at least 3 reviews
+        sql = """
+            SELECT 
+                Albums.Album_ID,
+                Albums.Album_Name,
+                Albums.Artist_Name,
+                COUNT(*) as review_count,
+                ROUND(AVG(rating), 2) as avg_rating
+            FROM Album_Reviews
+            JOIN Albums ON Album_Reviews.Album_ID = Albums.Album_ID
+            GROUP BY Albums.Album_ID, Albums.Album_Name, Albums.Artist_Name
+            HAVING AVG(rating) >= 4.0 AND COUNT(*) >= 3
+            ORDER BY avg_rating DESC, review_count DESC
+            LIMIT 10
+        """
+        
+        cursor.execute(sql)
+        top_albums = cursor.fetchall()
+        
+        cursor.close()
+        connection.close()
+        
+        return jsonify(top_albums)
+        
+    except Exception as e:
+        print(f"Error fetching top rated albums: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/check_album_unlock/<album_id>', methods=['GET'])
+def check_album_unlock(album_id):
+    try:
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        username = request.args.get('username')
+        if not username:
+            return jsonify({"error": "Username is required"}), 400
+
+        cursor = connection.cursor(dictionary=True)
+        
+        # Check if user has already reviewed this album
+        cursor.execute("""
+            SELECT * FROM Album_Reviews 
+            WHERE reviewer_username = %s AND Album_ID = %s
+        """, (username, album_id))
+        
+        has_reviewed = cursor.fetchone() is not None
+        
+        # If user has reviewed, they have access
+        if has_reviewed:
+            cursor.close()
+            connection.close()
+            return jsonify({
+                "is_unlocked": True,
+                "tokens_available": 0,
+                "unlock_cost": 0
+            })
+        
+        # Check if album is unlocked for this user
+        cursor.execute("""
+            SELECT * FROM Unlocked_Albums 
+            WHERE username = %s AND album_id = %s
+        """, (username, album_id))
+        
+        is_unlocked = cursor.fetchone() is not None
+        
+        # Get user's token count
+        cursor.execute("SELECT tokens FROM users WHERE username = %s", (username,))
+        user = cursor.fetchone()
+        
+        cursor.close()
+        connection.close()
+        
+        return jsonify({
+            "is_unlocked": is_unlocked,
+            "tokens_available": user['tokens'] if user else 0,
+            "unlock_cost": 5  # Fixed cost to unlock an album
+        })
+        
+    except Exception as e:
+        print(f"Error checking album unlock status: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/unlock_album', methods=['POST'])
+def unlock_album():
+    try:
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        data = request.get_json()
+        username = data.get('username')
+        album_id = data.get('album_id')
+        token_cost = 5  # Cost to unlock an album
+        
+        if not all([username, album_id]):
+            return jsonify({"error": "Missing username or album_id"}), 400
+
+        cursor = connection.cursor(dictionary=True)
+        
+        # Check if album is already unlocked
+        cursor.execute("""
+            SELECT * FROM Unlocked_Albums 
+            WHERE username = %s AND album_id = %s
+        """, (username, album_id))
+        
+        if cursor.fetchone():
+            cursor.close()
+            connection.close()
+            return jsonify({"error": "Album is already unlocked"}), 409
+
+        # Check if user has enough tokens
+        cursor.execute("SELECT tokens FROM users WHERE username = %s", (username,))
+        user = cursor.fetchone()
+        
+        if not user:
+            cursor.close()
+            connection.close()
+            return jsonify({"error": "User not found"}), 404
+            
+        if user['tokens'] < token_cost:
+            cursor.close()
+            connection.close()
+            return jsonify({
+                "error": "Insufficient tokens",
+                "tokens_available": user['tokens'],
+                "tokens_needed": token_cost
+            }), 400
+
+        try:
+            # Deduct tokens from user
+            cursor.execute("""
+                UPDATE users 
+                SET tokens = tokens - %s 
+                WHERE username = %s
+            """, (token_cost, username))
+            
+            # Add record to Unlocked_Albums
+            cursor.execute("""
+                INSERT INTO Unlocked_Albums (username, album_id, unlocked_at)
+                VALUES (%s, %s, NOW())
+            """, (username, album_id))
+            
+            # Commit the changes
+            connection.commit()
+            
+            cursor.close()
+            connection.close()
+            
+            return jsonify({
+                "success": True,
+                "message": "Album unlocked successfully",
+                "tokens_remaining": user['tokens'] - token_cost
+            })
+            
+        except Exception as e:
+            # Rollback in case of error
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            raise e
+            
+    except Exception as e:
+        if 'connection' in locals() and connection.is_connected():
+            connection.close()
+        print(f"Error unlocking album: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/check_artist_unlock/<artist_id>', methods=['GET'])
+def check_artist_unlock(artist_id):
+    try:
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        username = request.args.get('username')
+        if not username:
+            return jsonify({"error": "Username is required"}), 400
+
+        cursor = connection.cursor(dictionary=True)
+        
+        # Check if user has already reviewed this artist
+        cursor.execute("""
+            SELECT * FROM Artist_Reviews 
+            WHERE reviewer_username = %s AND Artist_ID = %s
+        """, (username, artist_id))
+        
+        has_reviewed = cursor.fetchone() is not None
+        
+        # If user has reviewed, they have access
+        if has_reviewed:
+            cursor.close()
+            connection.close()
+            return jsonify({
+                "is_unlocked": True,
+                "tokens_available": 0,
+                "unlock_cost": 0
+            })
+        
+        # Check if artist is unlocked for this user
+        cursor.execute("""
+            SELECT * FROM Unlocked_Artists 
+            WHERE username = %s AND artist_id = %s
+        """, (username, artist_id))
+        
+        is_unlocked = cursor.fetchone() is not None
+        
+        # Get user's token count
+        cursor.execute("SELECT tokens FROM users WHERE username = %s", (username,))
+        user = cursor.fetchone()
+        
+        cursor.close()
+        connection.close()
+        
+        return jsonify({
+            "is_unlocked": is_unlocked,
+            "tokens_available": user['tokens'] if user else 0,
+            "unlock_cost": 5  # Fixed cost to unlock an artist
+        })
+        
+    except Exception as e:
+        print(f"Error checking artist unlock status: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/unlock_artist', methods=['POST'])
+def unlock_artist():
+    try:
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        data = request.get_json()
+        username = data.get('username')
+        artist_id = data.get('artist_id')
+        token_cost = 5  # Cost to unlock an artist
+        
+        if not all([username, artist_id]):
+            return jsonify({"error": "Missing username or artist_id"}), 400
+
+        cursor = connection.cursor(dictionary=True)
+        
+        # Check if artist is already unlocked
+        cursor.execute("""
+            SELECT * FROM Unlocked_Artists 
+            WHERE username = %s AND artist_id = %s
+        """, (username, artist_id))
+        
+        if cursor.fetchone():
+            cursor.close()
+            connection.close()
+            return jsonify({"error": "Artist is already unlocked"}), 409
+
+        # Check if user has enough tokens
+        cursor.execute("SELECT tokens FROM users WHERE username = %s", (username,))
+        user = cursor.fetchone()
+        
+        if not user:
+            cursor.close()
+            connection.close()
+            return jsonify({"error": "User not found"}), 404
+            
+        if user['tokens'] < token_cost:
+            cursor.close()
+            connection.close()
+            return jsonify({
+                "error": "Insufficient tokens",
+                "tokens_available": user['tokens'],
+                "tokens_needed": token_cost
+            }), 400
+
+        try:
+            # Deduct tokens from user
+            cursor.execute("""
+                UPDATE users 
+                SET tokens = tokens - %s 
+                WHERE username = %s
+            """, (token_cost, username))
+            
+            # Add record to Unlocked_Artists
+            cursor.execute("""
+                INSERT INTO Unlocked_Artists (username, artist_id, unlocked_at)
+                VALUES (%s, %s, NOW())
+            """, (username, artist_id))
+            
+            # Commit the changes
+            connection.commit()
+            
+            cursor.close()
+            connection.close()
+            
+            return jsonify({
+                "success": True,
+                "message": "Artist unlocked successfully",
+                "tokens_remaining": user['tokens'] - token_cost
+            })
+            
+        except Exception as e:
+            # Rollback in case of error
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            raise e
+            
+    except Exception as e:
+        if 'connection' in locals() and connection.is_connected():
+            connection.close()
+        print(f"Error unlocking artist: {e}")
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)

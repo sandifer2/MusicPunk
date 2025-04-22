@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
 import '../CSS/Page.css';
+import '../CSS/SongDetails.css';
 
 function AlbumDetails() {
   const { albumId } = useParams();
@@ -16,6 +17,9 @@ function AlbumDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reviewedAlbum, setReviewedAlbum] = useState(null);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [tokensAvailable, setTokensAvailable] = useState(0);
+  const [unlockCost] = useState(5);
 
   // Fetch album details and reviews when component mounts
   useEffect(() => {
@@ -63,11 +67,24 @@ function AlbumDetails() {
         const userReview = data.find(review => review.reviewer_username === username);
         if (userReview) {
           setReviewedAlbum(1);
+          setIsUnlocked(true);
         } else {
           setReviewedAlbum(0);
         }
       })
       .catch(error => console.error('Error fetching reviews:', error));
+
+    // Then check unlock status
+    fetch(`http://127.0.0.1:5000/api/check_album_unlock/${albumId}?username=${username}`)
+      .then(response => response.json())
+      .then(data => {
+        // Only update isUnlocked if user hasn't reviewed yet
+        if (reviewedAlbum === 0) {
+          setIsUnlocked(data.is_unlocked);
+        }
+        setTokensAvailable(data.tokens_available);
+      })
+      .catch(error => console.error('Error checking unlock status:', error));
   }, [albumId]);
 
   const handleSubmitReview = (e) => {
@@ -128,6 +145,38 @@ function AlbumDetails() {
     return (sum / reviews.length).toFixed(1);
   };
 
+  const handleUnlockAlbum = () => {
+    const username = localStorage.getItem("username");
+    fetch('http://127.0.0.1:5000/api/unlock_album', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, album_id: albumId })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setIsUnlocked(true);
+          setTokensAvailable(data.tokens_remaining);
+          refreshTokenCount();
+          fetchReviews(); // Fetch reviews after unlocking
+          alert("Album unlocked successfully!");
+        } else {
+          alert(data.error || "Failed to unlock album.");
+        }
+      })
+      .catch(error => {
+        console.error("Unlock error:", error);
+        alert("Something went wrong.");
+      });
+  };
+
+  const fetchReviews = () => {
+    fetch(`http://127.0.0.1:5000/api/album_reviews/${albumId}`)
+      .then(response => response.json())
+      .then(data => setReviews(data))
+      .catch(error => console.error('Error fetching reviews:', error));
+  };
+
   if (loading) return <div className="page-container"><h2>Loading...</h2></div>;
   
   if (error) return (
@@ -153,153 +202,116 @@ function AlbumDetails() {
   if (!albumDetails) return <div className="page-container"><h2>No album data available</h2></div>;
 
   return (
-    <div className="page-container">
-      <h1>{albumDetails.Album_Name}</h1>
-      <p>Artist: {albumDetails.Artist_Name}</p>
-      <div className="rating-summary">
-        <p className="average-rating">
-          Average Rating: <strong>{calculateAverageRating()}</strong>/5
-          <span className="review-count">({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})</span>
-        </p>
+    <div className="song-details-container">
+      <h1 className="song-details-title">{albumDetails.Album_Name}</h1>
+      <div className="song-details-info">
+        <p>Artist: {albumDetails.Artist_Name}</p>
+        {isUnlocked && (
+          <div className="rating-summary">
+            <p className="average-rating">
+              Average Rating: <strong>{calculateAverageRating()}</strong>/5
+              <span className="review-count">({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})</span>
+            </p>
+          </div>
+        )}
+        {isUnlocked && reviewedAlbum === 0 && (
+          <p className="token-incentive">Add a review to earn 10 tokens!</p>
+        )}
       </div>
-      {reviewedAlbum === 0 && (
-        <p className="token-incentive">Add a review to earn 10 tokens!</p>
-      )}
 
-      {reviewedAlbum === 0 && (
-        <button 
-          onClick={() => setShowReviewModal(true)}
-          style={{
-            backgroundColor: '#1DB954',
-            color: 'white',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            marginBottom: '20px'
-          }}
-        >
-          Add Review
-        </button>
+      {isUnlocked ? (
+        <>
+          {reviewedAlbum === 0 && (
+            <button 
+              onClick={() => setShowReviewModal(true)}
+              style={{
+                backgroundColor: '#1DB954',
+                color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                marginBottom: '20px'
+              }}
+            >
+              Add Review
+            </button>
+          )}
+          {/* Reviews Section */}
+          <div className="reviews-section">
+            <h2>Reviews</h2>
+            {reviews.length === 0 ? (
+              <p>No reviews yet</p>
+            ) : (
+              <div>
+                {reviews.map((review, index) => (
+                  <div key={index} className="review-card">
+                    <div className="review-header">
+                      <strong>{review.reviewer_username}</strong>
+                      {' '}rated it {review.rating}/5
+                      {review.created_at && (
+                        <span className="review-date">
+                          • {new Date(review.created_at).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    <p className="review-content">{review.review}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="unlock-section">
+          <p>You must unlock this album to view and leave reviews.</p>
+          <p>You have <strong>{tokensAvailable}</strong> tokens.</p>
+          <p>Cost to unlock: <strong>{unlockCost}</strong> tokens</p>
+          <button className="add-review-button" onClick={handleUnlockAlbum}>
+            Unlock Album
+          </button>
+        </div>
       )}
 
       {/* Review Modal */}
       {showReviewModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: '#282828',
-            padding: '20px',
-            borderRadius: '10px',
-            width: '300px'
-          }}>
+        <div className="review-modal-overlay">
+          <div className="review-modal">
             <h2>Add Review</h2>
             <form onSubmit={handleSubmitReview}>
-              <div>
+              <div className="review-form-group">
                 <label>Rating:</label>
                 <select 
                   value={rating} 
                   onChange={(e) => setRating(Number(e.target.value))}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    marginBottom: '10px'
-                  }}
                 >
                   {[1,2,3,4,5].map(num => (
                     <option key={num} value={num}>{num}</option>
                   ))}
                 </select>
               </div>
-              <div>
+              <div className="review-form-group">
                 <label>Review:</label>
                 <textarea 
                   value={reviewText}
                   onChange={(e) => setReviewText(e.target.value)}
                   required
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    marginBottom: '10px',
-                    minHeight: '100px'
-                  }}
                 />
               </div>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between'
-              }}>
-                <button 
-                  type="submit"
-                  style={{
-                    backgroundColor: '#1DB954',
-                    color: 'white',
-                    padding: '10px 20px',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Submit Review
+              <div className="review-form-buttons">
+                <button type="submit" className="submit-review-button">
+                  Submit
                 </button>
                 <button 
-                  type="button"
+                  type="button" 
+                  className="cancel-review-button"
                   onClick={() => setShowReviewModal(false)}
-                  style={{
-                    backgroundColor: '#ff4136',
-                    color: 'white',
-                    padding: '10px 20px',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer'
-                  }}
                 >
                   Cancel
                 </button>
               </div>
             </form>
           </div>
-        </div>
-      )}
-
-      {/* Reviews Section */}
-      <h2>Reviews</h2>
-      {reviews.length === 0 ? (
-        <p>No reviews yet</p>
-      ) : (
-        <div>
-          {reviews.map((review, index) => (
-            <div 
-              key={index} 
-              style={{
-                backgroundColor: '#282828',
-                padding: '15px',
-                marginBottom: '10px',
-                borderRadius: '5px'
-              }}
-            >
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '10px'
-              }}>
-                <span style={{ fontWeight: 'bold' }}>{review.reviewer_username}</span>
-                <span>Rating: {review.rating}/5</span>
-                <span>{new Date(review.created_at).toLocaleDateString()}</span>
-              </div>
-              <p style={{ margin: 0 }}>{review.review}</p>
-            </div>
-          ))}
         </div>
       )}
     </div>

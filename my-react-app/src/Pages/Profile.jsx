@@ -20,11 +20,11 @@ export default function Profile() {
     const [pinnedReviews, setPinnedReviews] = useState([]);
     const { refreshTokenCount } = useOutletContext();
     const navigate = useNavigate();
+    const username = localStorage.getItem('username');
 
     useEffect(() => {
         fetchUserReviews();
         // Load pinned reviews from localStorage on component mount
-        const username = localStorage.getItem('username');
         const savedPinnedReviews = localStorage.getItem(`pinnedReviews_${username}`);
         if (savedPinnedReviews) {
             setPinnedReviews(JSON.parse(savedPinnedReviews));
@@ -158,6 +158,9 @@ export default function Profile() {
 
     return (
         <div className="profile-container">
+            <div className="username-display">
+                Welcome, {username}!
+            </div>
             <h1>My Profile</h1>
             
             <div className="profile-content">

@@ -11,6 +11,7 @@ import Login from "./Pages/Login";
 import SongDetails from './Pages/SongDetails';
 import AlbumDetails from './Pages/AlbumDetails';
 import ArtistDetails from './Pages/ArtistDetails';
+import TopRatedAlbums from './Pages/TopRatedAlbums';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/song/:songId" element={<SongDetails />} />
           <Route path="/album/:albumId" element={<AlbumDetails />} />
           <Route path="/artist/:artistId" element={<ArtistDetails />} />
+          <Route path="/top-rated-albums" element={<TopRatedAlbums />} />
         </Route>
       </Routes>
     </Router>

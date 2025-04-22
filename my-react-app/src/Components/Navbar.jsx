@@ -22,6 +22,9 @@ export function Navbar() {
             <Link to="/">
                 <button className="NavBarButtons">Back to login</button>
             </Link>
+            <Link to="/top-rated-albums">
+                <button className="NavBarButtons">Top Rated Albums</button>
+            </Link>
         </div>
     );
 }
