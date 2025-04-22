@@ -9,6 +9,8 @@ import Profile from "./Pages/Profile";
 import Login from "./Pages/Login";
 
 import SongDetails from './Pages/SongDetails';
+import AlbumDetails from './Pages/AlbumDetails';
+import ArtistDetails from './Pages/ArtistDetails';
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
           <Route path="/Page2" element={<Page2 />} />
           <Route path="/Profile" element={<Profile />} />
           <Route path="/song/:songId" element={<SongDetails />} />
+          <Route path="/album/:albumId" element={<AlbumDetails />} />
+          <Route path="/artist/:artistId" element={<ArtistDetails />} />
         </Route>
       </Routes>
     </Router>
