@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useOutletContext } from 'react-router-dom';
 import '../CSS/Page.css';
 
 function ArtistDetails() {
   const { artistId } = useParams();
+  const { refreshTokenCount } = useOutletContext();
   const [artistDetails, setArtistDetails] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -11,6 +12,7 @@ function ArtistDetails() {
   const [reviewText, setReviewText] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reviewedArtist, setReviewedArtist] = useState(null);
 
   useEffect(() => {
     if (!artistId) {
@@ -37,11 +39,19 @@ function ArtistDetails() {
         setLoading(false);
       });
 
-    // Fetch artist reviews
+    // First check if user has already reviewed this artist
+    const username = localStorage.getItem('username');
     fetch(`http://127.0.0.1:5000/api/artist_reviews/${artistId}`)
       .then(response => response.json())
       .then(data => {
         setReviews(data);
+        // Check if the current user has reviewed this artist
+        const userReview = data.find(review => review.reviewer_username === username);
+        if (userReview) {
+          setReviewedArtist(1);
+        } else {
+          setReviewedArtist(0);
+        }
       })
       .catch(error => console.error('Error fetching reviews:', error));
   }, [artistId]);
@@ -81,6 +91,15 @@ function ArtistDetails() {
         setRating(3);
         setReviewText('');
         setShowReviewModal(false);
+
+        // Update reviewedArtist state to indicate user has reviewed
+        setReviewedArtist(1);
+
+        // Refresh token count in the top right
+        refreshTokenCount();
+
+        // Show success message with token reward
+        alert(`Review submitted successfully! You earned ${data.tokens_earned} tokens! Your new balance is ${data.new_token_balance} tokens.`);
       } else {
         alert(data.message);
       }
@@ -89,6 +108,12 @@ function ArtistDetails() {
       console.error('Error submitting review:', error);
       alert('Failed to submit review');
     });
+  };
+
+  const calculateAverageRating = () => {
+    if (reviews.length === 0) return 0;
+    const sum = reviews.reduce((total, review) => total + review.rating, 0);
+    return (sum / reviews.length).toFixed(1);
   };
 
   if (loading) return <div className="page-container"><h2>Loading...</h2></div>;
@@ -118,21 +143,32 @@ function ArtistDetails() {
   return (
     <div className="page-container">
       <h1>{artistDetails.Artist_Name}</h1>
+      <div className="rating-summary">
+        <p className="average-rating">
+          Average Rating: <strong>{calculateAverageRating()}</strong>/5
+          <span className="review-count">({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})</span>
+        </p>
+      </div>
+      {reviewedArtist === 0 && (
+        <p className="token-incentive">Add a review to earn 10 tokens!</p>
+      )}
 
-      <button 
-        onClick={() => setShowReviewModal(true)}
-        style={{
-          backgroundColor: '#1DB954',
-          color: 'white',
-          padding: '10px 20px',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          marginBottom: '20px'
-        }}
-      >
-        Add Review
-      </button>
+      {reviewedArtist === 0 && (
+        <button 
+          onClick={() => setShowReviewModal(true)}
+          style={{
+            backgroundColor: '#1DB954',
+            color: 'white',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            marginBottom: '20px'
+          }}
+        >
+          Add Review
+        </button>
+      )}
 
       {/* Review Modal */}
       {showReviewModal && (
@@ -251,7 +287,7 @@ function ArtistDetails() {
             </div>
           ))
         ) : (
-          <p>No reviews yet. Be the first to review!</p>
+          <p>No reviews yet</p>
         )}
       </div>
     </div>

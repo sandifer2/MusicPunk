@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useOutletContext } from 'react-router-dom';
 import '../CSS/Page.css';
 
 function AlbumDetails() {
   const { albumId } = useParams();
+  const { refreshTokenCount } = useOutletContext();
   console.log("AlbumDetails component mounted");
   console.log("Album ID from URL params:", albumId);
 
@@ -14,6 +15,7 @@ function AlbumDetails() {
   const [reviewText, setReviewText] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reviewedAlbum, setReviewedAlbum] = useState(null);
 
   // Fetch album details and reviews when component mounts
   useEffect(() => {
@@ -50,12 +52,20 @@ function AlbumDetails() {
         setLoading(false);
       });
 
-    // Fetch reviews for this album
+    // First check if user has already reviewed this album
+    const username = localStorage.getItem('username');
     fetch(`http://127.0.0.1:5000/api/album_reviews/${albumId}`)
       .then(response => response.json())
       .then(data => {
         console.log("Fetched reviews:", data);
         setReviews(data);
+        // Check if the current user has reviewed this album
+        const userReview = data.find(review => review.reviewer_username === username);
+        if (userReview) {
+          setReviewedAlbum(1);
+        } else {
+          setReviewedAlbum(0);
+        }
       })
       .catch(error => console.error('Error fetching reviews:', error));
   }, [albumId]);
@@ -93,6 +103,15 @@ function AlbumDetails() {
         setRating(3);
         setReviewText('');
         setShowReviewModal(false);
+
+        // Update reviewedAlbum state to indicate user has reviewed
+        setReviewedAlbum(1);
+
+        // Refresh token count in the top right
+        refreshTokenCount();
+
+        // Show success message with token reward
+        alert(`Review submitted successfully! You earned ${data.tokens_earned} tokens! Your new balance is ${data.new_token_balance} tokens.`);
       } else {
         alert(data.message);
       }
@@ -101,6 +120,12 @@ function AlbumDetails() {
       console.error('Error submitting review:', error);
       alert('Failed to submit review');
     });
+  };
+
+  const calculateAverageRating = () => {
+    if (reviews.length === 0) return 0;
+    const sum = reviews.reduce((total, review) => total + review.rating, 0);
+    return (sum / reviews.length).toFixed(1);
   };
 
   if (loading) return <div className="page-container"><h2>Loading...</h2></div>;
@@ -131,21 +156,32 @@ function AlbumDetails() {
     <div className="page-container">
       <h1>{albumDetails.Album_Name}</h1>
       <p>Artist: {albumDetails.Artist_Name}</p>
+      <div className="rating-summary">
+        <p className="average-rating">
+          Average Rating: <strong>{calculateAverageRating()}</strong>/5
+          <span className="review-count">({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})</span>
+        </p>
+      </div>
+      {reviewedAlbum === 0 && (
+        <p className="token-incentive">Add a review to earn 10 tokens!</p>
+      )}
 
-      <button 
-        onClick={() => setShowReviewModal(true)}
-        style={{
-          backgroundColor: '#1DB954',
-          color: 'white',
-          padding: '10px 20px',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          marginBottom: '20px'
-        }}
-      >
-        Add Review
-      </button>
+      {reviewedAlbum === 0 && (
+        <button 
+          onClick={() => setShowReviewModal(true)}
+          style={{
+            backgroundColor: '#1DB954',
+            color: 'white',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            marginBottom: '20px'
+          }}
+        >
+          Add Review
+        </button>
+      )}
 
       {/* Review Modal */}
       {showReviewModal && (
@@ -173,7 +209,7 @@ function AlbumDetails() {
                 <label>Rating:</label>
                 <select 
                   value={rating} 
-                  onChange={(e) => setRating(e.target.value)}
+                  onChange={(e) => setRating(Number(e.target.value))}
                   style={{
                     width: '100%',
                     padding: '10px',
@@ -252,12 +288,16 @@ function AlbumDetails() {
                 borderRadius: '5px'
               }}
             >
-              <p>
-                <strong>{review.reviewer_username}</strong> 
-                {' '}rated it {review.rating}/5
-                {review.created_at && <span style={{color: '#999', fontSize: '0.8em'}}> • {new Date(review.created_at).toLocaleDateString()}</span>}
-              </p>
-              <p>{review.review}</p>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '10px'
+              }}>
+                <span style={{ fontWeight: 'bold' }}>{review.reviewer_username}</span>
+                <span>Rating: {review.rating}/5</span>
+                <span>{new Date(review.created_at).toLocaleDateString()}</span>
+              </div>
+              <p style={{ margin: 0 }}>{review.review}</p>
             </div>
           ))}
         </div>

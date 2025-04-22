@@ -786,21 +786,42 @@ def submit_artist_review():
             connection.close()
             return jsonify({"success": False, "message": "You've already reviewed this artist"}), 409
 
-        # Insert the review
-        insert_query = """
-        INSERT INTO Artist_Reviews
-        (reviewer_username, Artist_ID, rating, review, created_at)
-        VALUES (%s, %s, %s, %s, NOW())
-        """
-        cursor.execute(insert_query, (username, artist_id, rating, review_text))
+        try:
+            # Insert the review
+            insert_query = """
+            INSERT INTO Artist_Reviews
+            (reviewer_username, Artist_ID, rating, review, created_at)
+            VALUES (%s, %s, %s, %s, NOW())
+            """
+            cursor.execute(insert_query, (username, artist_id, rating, review_text))
 
-        # Commit the transaction
-        connection.commit()
+            # Add 10 tokens to the user's balance
+            cursor.execute("""
+                UPDATE users 
+                SET tokens = tokens + 10 
+                WHERE username = %s
+            """, (username,))
+            
+            # Get the updated token count
+            cursor.execute("SELECT tokens FROM users WHERE username = %s", (username,))
+            updated_user = cursor.fetchone()
+
+            # Commit the transaction
+            connection.commit()
+            
+            cursor.close()
+            connection.close()
+            
+            return jsonify({
+                "success": True, 
+                "message": "Review submitted successfully",
+                "tokens_earned": 10,
+                "new_token_balance": updated_user['tokens']
+            }), 201
         
-        cursor.close()
-        connection.close()
-        
-        return jsonify({"success": True, "message": "Review submitted successfully"}), 201
+        except Exception as e:
+            connection.rollback()
+            raise e
     
     except mysql.connector.Error as err:
         if 'connection' in locals() and connection:
@@ -814,6 +835,105 @@ def submit_artist_review():
             connection.close()
         print(f"Unexpected error: {e}")
         return jsonify({"success": False, "message": "An unexpected error occurred"}), 500
+
+@app.route('/api/submit_album_review', methods=['POST'])
+def submit_album_review():
+    try:
+        # Get a fresh connection for this request
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        # Get the review data from the request
+        data = request.get_json()
+        
+        # Extract review details
+        username = data.get('username')
+        album_id = data.get('album_id')
+        rating = data.get('rating')
+        review_text = data.get('review_text')
+        
+        # Validate input
+        if not all([username, album_id, rating, review_text]):
+            return jsonify({"success": False, "message": "Missing required review details"}), 400
+        # Validate rating is an integer between 1 and 5
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                return jsonify({"success": False, "message": "Rating must be between 1 and 5"}), 400
+        except ValueError:
+            return jsonify({"success": False, "message": "Invalid rating"}), 400
+        
+        # Create a cursor
+        cursor = connection.cursor(dictionary=True)
+        
+        # Check if user exists
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        user = cursor.fetchone()
+        if not user:
+            cursor.close()
+            connection.close()
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Check if album exists
+        cursor.execute("SELECT * FROM Albums WHERE Album_ID = %s", (album_id,))
+        album = cursor.fetchone()
+        if not album:
+            cursor.close()
+            connection.close()
+            return jsonify({"success": False, "message": "Album not found"}), 404
+        
+        # Check if user has already reviewed this album
+        cursor.execute("SELECT * FROM Album_Reviews WHERE reviewer_username = %s AND Album_ID = %s", (username, album_id))
+        existing_review = cursor.fetchone()
+        if existing_review:
+            cursor.close()
+            connection.close() 
+            return jsonify({"success": False, "message": "You've already reviewed this album"}), 409
+        
+        try:
+            # Insert the review
+            insert_query = """
+            INSERT INTO Album_Reviews 
+            (reviewer_username, Album_ID, rating, review, created_at) 
+            VALUES (%s, %s, %s, %s, NOW())
+            """
+            cursor.execute(insert_query, (username, album_id, rating, review_text))
+            
+            # Add 10 tokens to the user's balance
+            cursor.execute("""
+                UPDATE users 
+                SET tokens = tokens + 10 
+                WHERE username = %s
+            """, (username,))
+            
+            # Get the updated token count
+            cursor.execute("SELECT tokens FROM users WHERE username = %s", (username,))
+            updated_user = cursor.fetchone()
+            
+            # Commit the transaction
+            connection.commit()
+            
+            # Close the cursor
+            cursor.close()
+            connection.close()
+            
+            return jsonify({
+                "success": True, 
+                "message": "Review submitted successfully",
+                "tokens_earned": 10,
+                "new_token_balance": updated_user['tokens']
+            }), 201
+            
+        except Exception as e:
+            connection.rollback()
+            raise e
+            
+    except Exception as e:
+        if 'connection' in locals() and connection.is_connected():
+            connection.close()
+        print(f"Error submitting review: {e}")
+        return jsonify({"success": False, "message": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
