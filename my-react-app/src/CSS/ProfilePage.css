@@ -21,6 +21,41 @@
   margin: 0 auto;
 }
 
+.username-display {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #b3b3b3;
+}
+
+.review-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.tab-button {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  background-color: #444;
+}
+
+.tab-button.active {
+  background-color: #1DB954;
+  color: black;
+  font-weight: bold;
+}
+
 .profile-section {
   background-color: #282828;
   border-radius: 8px;
@@ -237,5 +272,14 @@
   
   .review-card {
     padding: 1.2rem;
+  }
+  
+  .review-tabs {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .tab-button {
+    width: 100%;
   }
 }

@@ -1253,6 +1253,96 @@ def unlock_artist():
             connection.close()
         print(f"Error unlocking artist: {e}")
         return jsonify({"error": str(e)}), 500
+    
+# Add these routes to your app.py file
+
+@app.route('/api/user/album_reviews', methods=['GET'])
+def get_user_album_reviews():
+    try:
+        # Get a fresh connection
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        # Get username from query parameters
+        username = request.args.get('username')
+        if not username:
+            return jsonify({"error": "Username is required"}), 400
+        
+        cursor = connection.cursor(dictionary=True)
+        
+        # Query to get all album reviews by the user with album details
+        sql = """
+            SELECT 
+                ar.album_review_ID AS review_id,
+                ar.Album_ID AS album_id,
+                a.Album_Name AS album_name,
+                a.Artist_Name AS artist_name,
+                ar.rating,
+                ar.review,
+                ar.created_at
+            FROM Album_Reviews ar
+            JOIN Albums a ON ar.Album_ID = a.Album_ID
+            WHERE ar.reviewer_username = %s
+            ORDER BY ar.created_at DESC
+        """
+        
+        cursor.execute(sql, (username,))
+        reviews = cursor.fetchall()
+        
+        cursor.close()
+        connection.close()
+        
+        return jsonify(reviews)
+        
+    except Exception as e:
+        print(f"Error fetching user album reviews: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/user/artist_reviews', methods=['GET'])
+def get_user_artist_reviews():
+    try:
+        # Get a fresh connection
+        connection = ensure_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+            
+        # Get username from query parameters
+        username = request.args.get('username')
+        if not username:
+            return jsonify({"error": "Username is required"}), 400
+        
+        cursor = connection.cursor(dictionary=True)
+        
+        # Query to get all artist reviews by the user with artist details
+        sql = """
+            SELECT 
+                ar.artist_review_ID AS review_id,
+                ar.Artist_ID AS artist_id,
+                a.Artist_Name AS artist_name,
+                ar.rating,
+                ar.review,
+                ar.created_at
+            FROM Artist_Reviews ar
+            JOIN Artists a ON ar.Artist_ID = a.Artist_ID
+            WHERE ar.reviewer_username = %s
+            ORDER BY ar.created_at DESC
+        """
+        
+        cursor.execute(sql, (username,))
+        reviews = cursor.fetchall()
+        
+        cursor.close()
+        connection.close()
+        
+        return jsonify(reviews)
+        
+    except Exception as e:
+        print(f"Error fetching user artist reviews: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
