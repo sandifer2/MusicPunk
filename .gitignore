@@ -41,9 +41,11 @@ coverage.xml
 *.swo
 .DS_Store
 
-# Flask stuff
-instance/
-.webassets-cache
+# FastAPI/postgres
+backend/.env
+*.pyc
+.pytest_cache/
+alembic.ini.local
 
 # Node.js / React
 node_modules/
@@ -70,7 +72,9 @@ yarn-error.log*
 .env
 *.env
 .flaskenv
-config.py
+backend/venv
+venv
+.\venv\
 
 # Logs
 logs/
