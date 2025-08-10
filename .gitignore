@@ -68,13 +68,18 @@ yarn-error.log*
 !schema.sql
 !seeds.sql
 
-# Environment variables and secrets
+# Environment variables and secrets, no chances taken 
 .env
 *.env
 .flaskenv
 backend/venv
 venv
 .\venv\
+venv/
+*/venv/
+backend/venv/
+__pycache__/
+*.pyc
 
 # Logs
 logs/
