@@ -37,13 +37,26 @@ coverage.xml
 # PyCharm, VS Code, and other IDEs
 .idea/
 .vscode/
+.vscode
 *.swp
 *.swo
 .DS_Store
+.vscode/settings.json
+.vscode/launch.json
+settings.json
+launch.json
 
-# Flask stuff
-instance/
-.webassets-cache
+# FastAPI/postgres
+backend/.env
+*.pyc
+.pytest_cache/
+alembic/versions/*.pyc
+alembic/__pycache__/
+
+
+
+# Alembic 
+alembic.ini.local
 
 # Node.js / React
 node_modules/
@@ -66,11 +79,18 @@ yarn-error.log*
 !schema.sql
 !seeds.sql
 
-# Environment variables and secrets
+# Environment variables and secrets, no chances taken 
 .env
 *.env
 .flaskenv
-config.py
+backend/venv
+venv
+.\venv\
+venv/
+*/venv/
+backend/venv/
+__pycache__/
+*.pyc
 
 # Logs
 logs/

@@ -1,11 +1,12 @@
-# Database-Systems-Project (MusicBox)
+# MusicBox: A music review app 
 
-A music review application with a React frontend and Flask backend that connects to a MySQL database.
 
+
+A music review application project with the intent of turning a crappy react, flask and mysql app into a cool react, fastapi and postgresql app.
 ## Project Structure
-
+- this is currently being reworked and may be innaccurate
 ```
-Database-Systems-Project/
+MusicBoxV2/
 ├── .vscode/                  # VSCode configuration
 │   └── settings.json
 ├── backend/                  # Flask server
