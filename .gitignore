@@ -37,6 +37,7 @@ coverage.xml
 # PyCharm, VS Code, and other IDEs
 .idea/
 .vscode/
+.vscode
 *.swp
 *.swo
 .DS_Store
