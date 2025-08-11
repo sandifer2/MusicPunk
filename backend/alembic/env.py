@@ -10,11 +10,11 @@ from dotenv import load_dotenv
 
 from app.database import Base
 from app.models.user import User
-# from app.models import Artist
+from app.models.artist import Artist
 from app.models.song import Song
-# from app.models import Album
-# from app.models import Review
-# from app.models import Unlocked_Items
+from app.models.album import Album
+# from app.models.review import Review
+# from app.models.unlocked_items import Unlocked_Items
 
 
 
