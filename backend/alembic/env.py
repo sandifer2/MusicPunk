@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from app.database import Base
 from app.models.user import User
 # from app.models import Artist
-# from app.models import Song
+from app.models.song import Song
 # from app.models import Album
 # from app.models import Review
 # from app.models import Unlocked_Items
