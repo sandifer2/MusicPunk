@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, ConfigDict
 from typing import Optional, List
 from datetime import datetime 
 
@@ -34,8 +34,9 @@ class SongReturn(SongBase):
     date_added: datetime
     date_updated: datetime[Optional] = None
 
-    class Config:
+    model_config = ConfigDict(
         from_attributes = True
+    )
 
 class SongUnlockStatus(SongReturn): #has forward references to logic TODO in Reviews 
     average_rating: Optional[float] = None

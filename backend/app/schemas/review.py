@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, field_validator, model_validator, ConfigDict
 from typing import Optional, Literal
 from datetime import datetime
 from enum import Enum
@@ -52,9 +52,9 @@ class ReviewResponse(ReviewBase):
     date_added: datetime
     date_updated: Optional[datetime] = None
 
-    class Config:
+    model_config = ConfigDict(
         from_attributes = True
-
+    )
 class ReviewDetails(ReviewResponse):
     item_title: str # TODO: query must be parameterized to match enum type of review 
     item_subtitle: Optional[str] = None #TODO: add logic so it returns only the artist attached to song when item is song or album, else none
