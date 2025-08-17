@@ -191,3 +191,39 @@ class TokenGrantRequest(BaseModel):
             self.transaction_type = TransactionType.ADMIN_DEDUCT
 
         return self
+
+class TokenPurchaseRequest(BaseModel):
+    token_amount: int = Field(..., gt=0, le=10000)
+    currency: str = Field(default="USD", regex="^[A-Z{3}$]")
+    payment_method_id = Optional[str] = Field(None, min_length=20, max_length=50)
+
+    @field_validator
+    @classmethod
+    def validate_purchase_tiers(cls, amount: int) -> int:
+        allowed_tiers = {100, 500, 1000, 2500, 5000, 10000}
+        if amount not in allowed_tiers:
+            raise ValueError(f"Token amount must be one of: {allowed_tiers}")
+        return amount 
+    
+class TokenEconomyConfig(BaseModel):
+
+    tokens_per_review: int = Field(default=10, ge=1, le=100)
+    signup_bonus: int = Field(default=100, ge=0, le=1000)
+    referral_bonus: int = Field(default=50, ge=0, le=500)
+
+    unlock_cost_song: int = Field(default=5, ge=1, le=50)
+    unlock_cost_album: int = Field(default=5, ge=1, le=50)
+    unlock_cost_artist: int = Field(default=5, ge=1, le=50)
+
+    min_review_length_for_tokens: int = Field(default=20, ge=0, le=1000)
+    cooldown_between_reviews_seconds: int = Field(default=30, ge=1000, le=1000000)
+
+    @model_validator(mode='after')
+    def validate_economy_balance(self) -> 'TokenEconomyConfig':
+        avg_unlock_cost = (self.unlock_cost_song + self.unlock_cost_album + self.unlock_cost_artist) / 3
+
+        if self.tokens_per_review > avg_unlock_cost * 3:
+            raise ValueError("Token earning rate too high relative to spending costs")
+        if self.signup_bonus > self.max_daily_earnings * 7:
+            raise ValueError("Signup bonus exceeds weekly earning potential")
+        return self 

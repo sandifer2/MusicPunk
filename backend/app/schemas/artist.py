@@ -177,3 +177,5 @@ class SpotifyArtistSync(BaseModel):
             followers= self.followers.get('total', 0),
             genres= self.genres
         )
+
+
