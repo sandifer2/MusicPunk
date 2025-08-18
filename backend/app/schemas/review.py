@@ -52,6 +52,8 @@ class ReviewResponse(ReviewBase):
     id: int
     user_id: int
     username: str
+    item_name: Optional[str] = None
+    artist_name: Optional[str] = None
     date_added: datetime
     date_updated: Optional[datetime] = None
 
