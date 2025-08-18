@@ -12,14 +12,9 @@ EmailStr = Annotated[str, Field(max_length=100)]
 
 class UserBase(BaseModel):
     model_config = ConfigDict(
-        #direct sqlalchemy model validation
         from_attributes=True,
-        #Validates field values on assignment, not just initalization, add this to other schemas
         validate_assignment=True,
-        #use enum values inside JSON? what does that even mean
         use_enum_values=True,
-    
-        #shows actual value of the invalid field in errors
         str_strip_whitespace=True,
 
         json_schema_extra={
@@ -46,11 +41,10 @@ class UserCreate(BaseModel):
         
         username = username.strip().lower()
 
-        # this can be simplified 
-        if not re.match(r'^[a-z0-9_]+$', username):
+        if not re.fullmatch(r'^[a-z0-9_]+$', username):
             raise ValueError('Username can only be alphanumeric characters and underscores')
-        # why dictionary
-        reserved_words = {'admin', 'api', 'root', 'user', 'login', 'register'} 
+
+        reserved_words = {'admin', 'api', 'root', 'user', 'login', 'register', 'users', 'delete', 'get', 'post', 'put', 'patch', 'health', 'status', 'system'} 
         if username in reserved_words:
             raise ValueError('This username is reserved')
         return username
@@ -67,7 +61,6 @@ class UserCreate(BaseModel):
         except EmailNotValidError as e:
             raise ValueError(f'Invalid email {str(e)}')
         
-    
     @field_validator('password')
     @classmethod
     def validate_password_strength(cls, password: str) -> str:
@@ -138,11 +131,9 @@ class UserResponse(BaseModel):
 
     review_count: int = 0
  
-
     model_config = ConfigDict(
         from_attributes=True
     )
-
 
 class TokenResponse(BaseModel):
     '''
@@ -155,7 +146,6 @@ class TokenResponse(BaseModel):
     token_type: str = "Bearer"
     expires_in: int = Field(default_factory=lambda: settings.ACCESS_TOKEN_EXPIRE_SECONDS)
     user: UserResponse
-
 
 class TokenPayload(BaseModel):
     sub: int #subj id

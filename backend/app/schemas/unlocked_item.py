@@ -10,7 +10,6 @@ class ReviewType(str, Enum):
     ALBUM = 'ALBUM'
     ARTIST = 'ARTIST'
 
-
 class UnlockedItemBase(BaseModel):
     item_type: ReviewType
     item_id: int = Field(..., gt=0)
@@ -21,7 +20,6 @@ class UnlockedItemBase(BaseModel):
         str_strip_whitespace=True,
         use_enum_values=True        
     )
-
 
 class UnlockedItemCreate(UnlockedItemBase):
     user_id: int = Field(..., gt=0)
@@ -47,7 +45,7 @@ class UnlockRequest(UnlockedItemBase): # way over my head need deep explaination
     def validate_idempotency_key(cls, key: Optional[str]) -> Optional[str]:
         if key is None:
             return None
-        if not re.match(r'^[A-Za-z0-9_\-]+$', key):
+        if not re.fullmatch(r'^[A-Za-z0-9_\-]+$', key):
             raise ValueError('Idempotency key must be URL safe: (A-Za-z0-9_- only)')
         return key
     

@@ -63,8 +63,6 @@ class ReviewDetails(ReviewResponse):
     item_title: str #song/artist/album title
     item_subtitle: Optional[str] = None # artist for song/album
 
-
-    
 class ReviewUpdate(BaseModel):
     rating: Optional[float] = None
     review_text: Optional[str] = None

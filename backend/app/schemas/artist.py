@@ -13,7 +13,6 @@ class ArtistBase(BaseModel):
         from_attributes=True,
         validate_assignment=True,
         str_strip_whitespace=True
-        
     )
 
 class ArtistCreate(ArtistBase):
@@ -27,7 +26,7 @@ class ArtistCreate(ArtistBase):
         if not spotify_id:
             raise ValueError('Spotify artist ID is required')
         
-        if not re.match(r'^[a-zA-Z0-9]{22}$', spotify_id):
+        if not re.fullmatch(r'^[a-zA-Z0-9]{22}$', spotify_id):
             raise ValueError (f'Invalid Spotify ID format. Expected 22 base-62 characters, got {spotify_id}')
         
         return spotify_id
@@ -48,8 +47,6 @@ class ArtistCreate(ArtistBase):
             if clean and clean not in normalized:
                 normalized.append(clean)
         return normalized
-    
-
     
 class ArtistResponse(ArtistBase):
     id: int

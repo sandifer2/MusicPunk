@@ -21,7 +21,7 @@ class AlbumCreate(AlbumBase):
     release_date: Optional[date] = None
     label: Optional[str] = Field(None, max_length = 100)
     features: Optional[str] = Field(None, max_length = 500)
-    album_type: Optional[str] = Field(None, regex="^(album|single|compilation)$")
+    album_type: Optional[str] = Field(None, regex="^(album|single|compilation)$") #TODO: change to enum types
     total_tracks: Optional[int] = Field(None, ge=1, le=500)
 
     @field_validator('spotify_album_id')
@@ -30,7 +30,7 @@ class AlbumCreate(AlbumBase):
         if not spotify_id:
             raise ValueError('Spotify Album ID is required')
         
-        if not re.match(r'^[a-zA-Z0-9]{22}$', spotify_id):
+        if not re.fullmatch(r'^[a-zA-Z0-9]{22}$', spotify_id):
             raise ValueError(f'Invalid Spotify ID format: {spotify_id}')
         return spotify_id
     
@@ -44,8 +44,7 @@ class AlbumCreate(AlbumBase):
 
         if not artists:
             return None
-        
-        # TODO: Improve space and time complexity here
+
         seen = set()
         unique_artists = []
         for artist in artists:
@@ -65,8 +64,6 @@ class AlbumCreate(AlbumBase):
             raise ValueError(f'Invalid release date: {release_date}')
             
         return release_date
-    
-
     
 class AlbumResponse(AlbumBase):
     id: int

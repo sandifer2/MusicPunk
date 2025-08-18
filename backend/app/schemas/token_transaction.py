@@ -12,8 +12,6 @@ class TransactionType(str, Enum):
     SIGNUP_BONUS = "signup_bonus"
     CONTENT_UNLOCKED = "content_unlocked"
     
-
-
 class TokenTransactionBase(BaseModel):
     amount: int = Field(..., description="Positive for credits, negative for debits")
     TransactionType: TransactionType
@@ -90,7 +88,7 @@ class TokenTransactionCreate(TokenTransactionBase):
     def validate_idempotency_key(cls, key: Optional[str]) -> Optional[str]:
         if key is None:
             return None
-        if not re.match(r'^[A-Za-z0-9_\-]+$', key):
+        if not re.fullmatch(r'^[A-Za-z0-9_\-]+$', key):
             raise ValueError("Idempotency key must be URL safe (alphanumeric, _ or - only )")
 
         return key
@@ -103,7 +101,6 @@ class TokenTransactionResponse(TokenTransactionBase):
 
     review_id: Optional[int] = None
     unlocked_item_id: Optional[int] = None 
-
 
     display_description: Optional[str] = None
     is_credit: bool = Field(default=False)
