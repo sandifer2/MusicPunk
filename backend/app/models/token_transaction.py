@@ -19,10 +19,12 @@ class TokenTransaction(Base):
     unlocked_item_id = Column(Integer, ForeignKey("unlocked_items.id"), nullable=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    idempotency_key = Column(String(64), nullable=True, unique=True, index=True)
     
     user = relationship("User", back_populates="token_transactions")
     
     __table_args__ = (
-        Index('idx_token_trans_user_date', 'user_id', 'created_at'),
         CheckConstraint('amount != 0', name='check_amount_not_zero'),
+        Index('idx_token_trans_user_date', 'user_id', 'created_at'),
+        Index('idx_token_trans_idempotency', 'idempotency_key', 'user_id'),
     )
