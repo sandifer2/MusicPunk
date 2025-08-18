@@ -7,16 +7,14 @@ from typing import Optional
 
 class TokenService:
     """
-    Centralized service for all token-related operations.
-    This is where your token economy logic lives.
+    Centralized service for all token-related operations
+    This is where your token economy logic lives
     """
     
     @staticmethod
     def calculate_review_reward(review_text: Optional[str]) -> int:
         """
-        Calculate tokens earned for a review based on content.
-        
-        Why: Incentivize quality reviews with more tokens.
+        Calculate tokens earned for a review based on content
         """
         if not review_text or len(review_text) < settings.MIN_REVIEW_LENGTH:
             return settings.TOKENS_PER_REVIEW_NO_TEXT
@@ -31,8 +29,6 @@ class TokenService:
     def get_signup_bonus() -> int:
         """
         Get current signup bonus amount.
-        
-        Why: Allows for promotional periods.
         """
         base_bonus = settings.TOKENS_SIGNUP_BONUS
         
@@ -43,30 +39,15 @@ class TokenService:
     
     @staticmethod
     def get_unlock_cost(item_type: str) -> int:
-        """
-        Get unlock cost for different item types.
-        
-        Future: Could have different costs per type.
-        """
-        # For now, flat rate
         return settings.TOKENS_UNLOCK_COST
         
-        # Future expansion:
-        # costs = {
-        #     "SONG": settings.TOKENS_UNLOCK_COST_SONG,
-        #     "ALBUM": settings.TOKENS_UNLOCK_COST_ALBUM,
-        #     "ARTIST": settings.TOKENS_UNLOCK_COST_ARTIST
-        # }
-        # return costs.get(item_type, settings.TOKENS_UNLOCK_COST)
-    
     @staticmethod
-    async def can_user_afford(db: Session, user_id: int, cost: int) -> bool:
-        """Check if user has enough tokens."""
+    def can_user_afford(db: Session, user_id: int, cost: int) -> bool:
         user = db.query(User).filter(User.id == user_id).first()
         return user and user.tokens >= cost
     
     @staticmethod
-    async def transfer_tokens(
+    def transfer_tokens(
         db: Session,
         user_id: int,
         amount: int,
@@ -75,9 +56,7 @@ class TokenService:
         idempotency_key: Optional[str] = None
     ) -> TokenTransaction:
         """
-        Core method to handle any token transaction.
-        
-        Why: Single place for all token movements with proper locking.
+        Single place for all token movements with proper locking
         """
         # Check idempotency
         if idempotency_key:
@@ -100,11 +79,9 @@ class TokenService:
         
         if new_balance < 0:
             raise ValueError(f"Insufficient tokens. Have: {user.tokens}, Need: {abs(amount)}")
-        
-        # Update user balance
+
         user.tokens = new_balance
         
-        # Create transaction record
         transaction = TokenTransaction(
             user_id=user_id,
             amount=amount,
