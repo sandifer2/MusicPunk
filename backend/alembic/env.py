@@ -15,6 +15,7 @@ from app.models.song import Song
 from app.models.album import Album
 from app.models.review import Review
 from app.models.unlocked_item import UnlockedItem
+from app.models.token_transaction import TokenTransaction
 
 
 

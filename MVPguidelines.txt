@@ -1,0 +1,53 @@
+1. Core Features (MVP)
+
+- Users
+
+- Sign up, log in
+
+- Have tokens (earn/spend)
+
+Reviews
+
+- Users leave reviews on songs, albums, artists
+
+- Reviews give tokens
+
+Unlocks
+
+- Spend tokens to unlock full review insights for an item
+
+Catalog
+
+- Store artists, albums, songs (Spotify IDs)
+
+- Search/browse
+
+2. Nice-to-Have (Later)
+
+Stripe: buy tokens with real money
+
+AI recs: “generate me a playlist” using tokens
+
+User profiles: show stats, top genres/artists
+
+Dashboards: admin or analytics
+
+3. Success Criteria (resume-level)
+
+Backend API (FastAPI) with endpoints for auth, reviews, unlocks, search
+
+PostgreSQL schema with Users, Reviews, Songs, Albums, Artists, UnlockedItems
+
+Token logic working: earn on review, spend on unlock
+
+Tests for main flows
+
+React frontend can:
+
+Register/login
+
+Browse catalog
+
+Leave reviews
+
+Unlock reviews with tokens

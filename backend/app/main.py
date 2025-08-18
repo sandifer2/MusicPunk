@@ -1,18 +1,21 @@
-from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
-from typing import List, Annotated
-from app.database import get_db, test_connection
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from app.database import test_connection, engine
 
-app = FastAPI(
-    title="MusicBoxAPI"
-)
-
-@app.on_event("startup")
-async def startup_check():
-    '''Check db connection on startup'''
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     print("Starting MusicBox")
     print("Testing db connection")
-    test_connection()
+    if not test_connection():
+        raise RuntimeError("DB connection failed")
+    yield #split startup and shutdown
+    print("Shutting down MusicBox API")
+    engine.dispose()
+
+app = FastAPI(
+    title="MusicBoxAPI",
+    lifespan=lifespan
+)
 
 @app.get("/")
 async def health_check():

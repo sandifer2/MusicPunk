@@ -91,6 +91,8 @@ venv/
 backend/venv/
 __pycache__/
 *.pyc
+config.py
+backend/app/core/config.py
 
 # Logs
 logs/
