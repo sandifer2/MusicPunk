@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, CheckConstraint, Index, NUMERIC, func
+from sqlalchemy import Column, Integer, String, DateTime, Date, ForeignKey, CheckConstraint, Index, NUMERIC, func
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -11,6 +11,7 @@ class Song(Base):
     title = Column(String(200), nullable=False, index=True)
     artist_id = Column(Integer, ForeignKey("artists.id"), nullable=False, index=True)
     album_id = Column(Integer, ForeignKey("albums.id"), nullable=False, index=True)
+    release_date = Column(Date, nullable=True, index=True)
 
     popularity = Column(Integer)
     features = Column(String(500))
