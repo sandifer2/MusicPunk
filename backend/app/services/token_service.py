@@ -27,13 +27,10 @@ class TokenService:
     
     @staticmethod
     def get_signup_bonus() -> int:
-        """
-        Get current signup bonus amount.
-        """
         base_bonus = settings.TOKENS_SIGNUP_BONUS
         
         if settings.NEW_USER_PROMO_ACTIVE:
-            return base_bonus + 50  # Extra 50 tokens during promo
+            return base_bonus + 50  
             
         return base_bonus
     
@@ -58,7 +55,7 @@ class TokenService:
         """
         Single place for all token movements with proper locking
         """
-        # Check idempotency
+        # if client retries same operation, only validate 1 
         if idempotency_key:
             existing = db.query(TokenTransaction).filter(
                 TokenTransaction.idempotency_key == idempotency_key,
@@ -70,18 +67,19 @@ class TokenService:
         # Lock user row to prevent race conditions
         user = db.query(User).filter(
             User.id == user_id
-        ).with_for_update().first()  # Row-level lock
+        ).with_for_update().first()  # lock until transaction is complete
         
         if not user:
             raise ValueError("User not found")
         
         new_balance = user.tokens + amount
         
-        if new_balance < 0:
+        if new_balance < 0: #overdraft
             raise ValueError(f"Insufficient tokens. Have: {user.tokens}, Need: {abs(amount)}")
 
         user.tokens = new_balance
         
+        #ledger entry into token_transaction table for each exchange for paper trail
         transaction = TokenTransaction(
             user_id=user_id,
             amount=amount,

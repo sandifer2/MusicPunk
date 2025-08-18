@@ -10,10 +10,10 @@ class AlbumBase(BaseModel):
     spotify_album_id: str = Field(..., min_length = 22, max_length=22)
 
     model_config = ConfigDict(
-        from_attributes=True,
-        validate_assignment=True,
-        str_strip_whitespace=True,
-        use_enum_values=True
+        from_attributes=True, # allow attributes from obj, rather than just dict()
+        validate_assignment=True, #validate on initialization and assignment
+        str_strip_whitespace=True, 
+        use_enum_values=True #clean serialization when returning json
     )
 
 class AlbumCreate(AlbumBase):
