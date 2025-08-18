@@ -69,8 +69,16 @@ class ArtistResponse(ArtistBase):
         if rating is None:
             return None
         return round(rating, 1)
-    
 
+class ArtistEmbedded(BaseModel):
+    '''for nested responses in albums/songs'''
+    id: int
+    artist_name: str
+    spotify_artist_id: str
+
+    model_config= ConfigDict(
+        from_attributes=True
+    )
 
 
 

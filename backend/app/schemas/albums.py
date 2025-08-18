@@ -68,7 +68,7 @@ class AlbumCreate(AlbumBase):
 class AlbumResponse(AlbumBase):
     id: int
     primary_artist_id: int
-    artist_name: str # need to get from join
+    artist_name: str # comes from hybrid property
     release_date: Optional[date] = None
     label: Optional[str] = None
     features: Optional[str] = None
@@ -90,3 +90,15 @@ class AlbumResponse(AlbumBase):
         
         return round(rating, 1)
 
+class AlbumQuickSearch(BaseModel):
+    '''Compact album for search/lists'''
+    id: int
+    title: str
+    spotify_album_id: str
+    artist_name: str
+    release_date: Optional[date] = None
+    average_rating: Optional[float] = None
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )

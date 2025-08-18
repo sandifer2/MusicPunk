@@ -39,7 +39,7 @@ class SongReturn(SongBase):
     date_updated: Optional[datetime] = None
 
     model_config = ConfigDict(
-        from_attributes = True
+        from_attributes=True
     )
 
 class SongUnlockStatus(SongReturn): 
