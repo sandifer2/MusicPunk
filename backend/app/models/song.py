@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Date, ForeignKey, CheckConstraint, Index, NUMERIC, func
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from app.database import Base
 
 
@@ -35,5 +36,15 @@ class Song(Base):
         Index('idx_song_artist_album', 'artist_id', 'album_id'),
         Index('idx_song_popularity', 'popularity'),  
     )
+
+    @hybrid_property
+    def artist_name(self):
+        """Access artist name through relationship"""
+        return self.artist.artist_name if self.artist else None
+    
+    @hybrid_property
+    def album_title(self):
+        """Access album title through relationship"""
+        return self.album.title if self.album else None
 
 

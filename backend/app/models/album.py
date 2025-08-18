@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, NUMERIC, func
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from app.database import Base
 
 class Album(Base):
@@ -24,6 +25,11 @@ class Album(Base):
     songs = relationship("Song", back_populates="album", cascade="all, delete-orphan")
     reviews = relationship("Review", back_populates="album", cascade="all, delete-orphan")
     unlocked_items = relationship("UnlockedItem", back_populates="album", cascade="all, delete-orphan")
+
+    @hybrid_property
+    def artist_name(self):
+        """access primary artist name through relationship"""
+        return self.primary_artist.artist_name if self.primary_artist else None
 
 
 
