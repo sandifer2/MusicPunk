@@ -1,6 +1,6 @@
 from pydantic import BaseModel, field_validator, Field, ConfigDict
 from typing import Optional, List
-from datetime import datetime 
+from datetime import datetime, date
 from core.config import settings
 
 class SongBase(BaseModel):
@@ -8,6 +8,7 @@ class SongBase(BaseModel):
     spotify_id: str
     popularity: Optional[int] = None
     features: Optional[str] = None
+    release_date: Optional[date] = None
 
 class SongCreate(SongBase):
     artist_id: int
@@ -25,7 +26,7 @@ class SongCreate(SongBase):
 
     @field_validator('spotify_id')
     @classmethod
-    def validate_spotify_id(cls, id):
+    def validate_spotify_id(cls, id): 
         if not id or len(id) != 22:
             raise ValueError('Invalid Spotify ID: empty ID or length not 22')
         return id
@@ -56,6 +57,7 @@ class SongSearchResults(BaseModel):
     spotify_id: str
     review_count: int = 0
     average_rating: Optional[float] = None
+    release_date: Optional[date] = None
 
     model_config = ConfigDict(
         from_attributes=True
