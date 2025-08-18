@@ -14,7 +14,7 @@ class TransactionType(str, Enum):
     
 class TokenTransactionBase(BaseModel):
     amount: int = Field(..., description="Positive for credits, negative for debits")
-    TransactionType: TransactionType
+    transaction_type: TransactionType
 
     model_config = ConfigDict(
         from_attributes=True,

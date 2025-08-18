@@ -48,4 +48,5 @@ class Review(Base):
         Index('idx_review_song_rating', 'song_id', 'rating'),  # avg rating per song
         Index('idx_review_album_rating', 'album_id', 'rating'),
         Index('idx_review_artist_rating', 'artist_id', 'rating'),
+        Index('idx_review_user_item', 'user_id', 'song_id', 'album_id', 'artist_id'),
     )
