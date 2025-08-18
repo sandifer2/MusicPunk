@@ -3,6 +3,7 @@ from typing import Optional, List, Tuple
 from datetime import datetime 
 from enum import Enum
 import re
+from core.config import settings
 
 class ReviewType(str, Enum):
     SONG = 'SONG'
@@ -25,7 +26,7 @@ class UnlockedItemBase(BaseModel):
 class UnlockedItemCreate(UnlockedItemBase):
     user_id: int = Field(..., gt=0)
 
-    @field_validator
+    @field_validator('item_id')
     @classmethod
     def validate_item_id(cls, id: int) -> int:
         if id <= 0:
@@ -34,12 +35,11 @@ class UnlockedItemCreate(UnlockedItemBase):
     
 class UnlockRequest(UnlockedItemBase): # way over my head need deep explaination on this 
 
-    expected_cost: int = Field(5, ge=1, le=10_000)
     idempotency_key: Optional[str] = Field(
         default=None,
         min_length=8,
         max_length=64,
-        description="Client supplied key to make unlock attempts idempotent"
+        description="Client-generated key to make unlock attempts idempotent"
     )
 
     @field_validator('idempotency_key')
@@ -52,29 +52,24 @@ class UnlockRequest(UnlockedItemBase): # way over my head need deep explaination
         return key
     
 class UnlockResult(BaseModel):
-    successL: bool
+    success: bool
     already_unlocked: bool = False
-    charged_tokens: int = 0
-    remaining_tokens: Optional[int] = None
-    unlocked_at: Optional[datetime] = None
-    message: Optional[str] = None
+    tokens_charged: int = 0
+    remaining_tokens: int = 0 
+    message: str
 
 class UnlockedItemResponse(UnlockedItemBase):
-    id: int
-    user_id: int
+    item_type: ReviewType
+    item_id: int
+    item_name: str
     is_unlocked: bool = False
     has_reviewed: bool = False
-    unlock_cost: int = 10
+    unlock_cost: int = Field(default_factory=lambda: settings.TOKENS_UNLOCK_COST)
     user_tokens: Optional[int] = None
+    unlocked_at: Optional[datetime] = None
 
-class UnlockedItemSearch(BaseModel):
-    user_id: Optional[int] = Field(None, gt=0)
-    item_type: Optional[ReviewType] = None
-    offset: int = Field(0, ge=0)
-    limit: int = Field(20, ge=1, le=100)
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
-    @model_validator(mode='after')
-    def require_filter_for_admin_scale(self) -> 'UnlockedItemSearch': #what in gods name 
-        #enforce something in routes instead
-        return self 
 

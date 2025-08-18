@@ -1,8 +1,10 @@
 from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
 from typing import Optional, List, Annotated
 from datetime import datetime
+from core.config import settings
 import re
 from email_validator import validate_email, EmailNotValidError
+import secrets
 
 PasswordStr = Annotated[str, Field(min_length=8, max_length=128)]
 UsernameStr = Annotated[str, Field(min_length=3, max_length=50)]
@@ -17,7 +19,7 @@ class UserBase(BaseModel):
         #use enum values inside JSON? what does that even mean
         use_enum_values=True,
     
-        #shows specific actual value of the invalid field in errors
+        #shows actual value of the invalid field in errors
         str_strip_whitespace=True,
 
         json_schema_extra={
@@ -71,7 +73,7 @@ class UserCreate(BaseModel):
     def validate_password_strength(cls, password: str) -> str:
         ''' 
         OWASP recommendations implemented in validation of strength
-        Entropy: 94^8 ( 26 + 26 + 10 + 32 = 94 ^ 8 (character min))
+        Entropy: 94^8 ( 26 + 26 + 10 + 32 = 94 ^ 8(character min))
         '''
 
         if not password:
@@ -105,19 +107,18 @@ class UserLogin(BaseModel):
     
     @field_validator('username_or_email')
     @classmethod
-    def validate_login(cls, value: str) -> str:
+    def validate_login_id(cls, value: str) -> str:
         if not value or not value.strip():
             raise ValueError('Username or email is required')
         
         value = value.strip().lower()
 
-        if len(value) > 100:
+        if len(value) > 100 or len(value) < 3:
             raise ValueError('Username or email invalid: Length Error')
         
         return value
     
 class UserUpdate(BaseModel):
-    email: Optional[EmailStr] = None
     current_password: Optional[str] = None
     new_password: Optional[PasswordStr] = None
 
@@ -135,23 +136,12 @@ class UserResponse(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    review_count: Optional[int] = 0
-    unlocked_count: Optional[int] = 0
-    average_rating: Optional[float] = None
+    review_count: int = 0
+ 
 
     model_config = ConfigDict(
         from_attributes=True
     )
-
-class UserPublicProfile(BaseModel):
-    id: int
-    username: str
-    created_at: datetime
-    review_count: int = 0
-    average_rating: Optional[float] = None
-
-    top_genres: List[str] = []
-    favorite_artists: List[str] = []
 
 
 class TokenResponse(BaseModel):
@@ -163,15 +153,17 @@ class TokenResponse(BaseModel):
     access_token: str
     refresh_token: Optional[str] = None
     token_type: str = "Bearer"
-    expires_in: int = 900
+    expires_in: int = Field(default_factory=lambda: settings.ACCESS_TOKEN_EXPIRE_SECONDS)
     user: UserResponse
 
 
 class TokenPayload(BaseModel):
-    sub: int
-    exp: int
-    iat: int
+    sub: int #subj id
+    exp: int 
+    iat: int #issued at
+    token_type: str ="access"
     jti: Optional[str] = None
+
 
 
 
