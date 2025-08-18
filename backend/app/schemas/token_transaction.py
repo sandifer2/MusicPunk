@@ -57,10 +57,10 @@ class TokenTransactionCreate(TokenTransactionBase):
         if transaction_type in earning_types and amount < 0:
             raise ValueError(f"Transaction type {transaction_type} must have a positive amount ")
         elif transaction_type in spending_types and amount > 0:
-            raise ValueError(f"Transaction amount exceeds maximum allowed (100,000 tokens)")
+            raise ValueError(f"Transaction type {transaction_type} must have a negative amount")
         
         if abs(amount) > 100000:
-            raise ValueError("Transaction amounte exceeds max: 100,000 tokens")
+            raise ValueError("Transaction amount exceeds max: 100,000 tokens")
         return amount
     
     @model_validator(mode='after')

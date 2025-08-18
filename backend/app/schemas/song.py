@@ -34,7 +34,7 @@ class SongCreate(SongBase):
 class SongReturn(SongBase):
     id: int
     artist_name: str
-    album_name: str
+    album_title: str
     date_added: datetime
     date_updated: Optional[datetime] = None
 
@@ -53,7 +53,7 @@ class SongSearchResults(BaseModel):
     id: int
     title: str
     artist_name: str
-    album_name: str
+    album_title: str
     spotify_id: str
     review_count: int = 0
     average_rating: Optional[float] = None
