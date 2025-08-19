@@ -9,36 +9,15 @@ const Login = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    fetch('http://127.0.0.1:5000/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        username: username,
-        password: password
-      })
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to login");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data.success) {
-          // Store the username in localStorage for use in other components
-          localStorage.setItem('username', username);
-          console.log("Username stored in localStorage:", username);
-          navigate('/home');
-        } else {
-          alert(data.message);
-        }
-      })
-      .catch((error) => {
-        console.error("Error Logging in:", error);
-        alert("Login failed. Please try again.");
-      });
+
+    if (username && password) {
+      localStorage.setItem('username', username);
+      console.log("Username stored in localstorage: ", username);
+
+      navigate('/home')
+    } else{
+      alert("Please enter both username and password")
+    }
   };
 
   return (
