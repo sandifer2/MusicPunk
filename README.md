@@ -1,8 +1,8 @@
-# MusicBox: A music review app 
+# MusicPunk: A music review app inspired by Letterboxd
 
 
 
-A music review application project with the intent of turning a crappy react, flask and mysql app into a cool react, fastapi and postgresql app.
+A music review application project with the intent of turning a barely working school project into a dynamic full-stack app with React, FastAPI, PostgreSQL(hosted on AWS RDS) and Capacitor(future)
 ## Project Structure
 - this is currently being reworked and may be innaccurate
 ```
