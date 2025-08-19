@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom"
 import Table from "./Table";
 import '../CSS/Home.css'
+import { motion } from 'framer-motion'
 
 
 function Home() {
@@ -47,86 +48,112 @@ function Home() {
   };
 
   return (
-    <div className="home-container">
-      <form onSubmit={handleSearch} className="search-form">
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="search-dropdown"
-        >
-          <option value="songs">Songs</option>
-          <option value="albums">Albums</option>
-          <option value="artists">Artists</option>
-        </select>
+    <motion.div
+    initial={{ opacity: 0}}
+    animate ={{opacity: 1}}
+    exit = {{opacity: 0}}
+    transition = {{ duration: 1}}
+    >
+      <div className="home-container">
+      {/* Cyberpunk Background Effects */}
+      <div className="cyber-grid"></div>
+      <div className="scan-lines"></div>
+      
+      {/* Hero Section */}
+      <div className="cyber-hero">
+        <div className="glitch" data-text="MUSICPUNK">MUSICPUNK</div>
+        <div className="hero-subtitle">
+          <span className="cyber-text">NEURAL_MUSIC_INTERFACE_</span>
+          <span className="blink">▮</span>
+        </div>
+      </div>
 
-        <input
-          type="text"
-          placeholder="Search..."
-          className="search-input"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      {/* Search Terminal */}
+      <div className="search-terminal">
+        <div className="terminal-header">
+          <span className="terminal-dots">
+            <span className="dot dot-red"></span>
+            <span className="dot dot-yellow"></span>
+            <span className="dot dot-green"></span>
+          </span>
+          <span className="terminal-title">SEARCH_PROTOCOL_V2.0</span>
+        </div>
+        
+        <form onSubmit={handleSearch} className="cyber-search-form">
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="cyber-select"
+          >
+            <option value="songs">[SONGS]</option>
+            <option value="albums">[ALBUMS]</option>
+            <option value="artists">[ARTISTS]</option>
+          </select>
 
-        <button type="submit" className="search-button">Search</button>
-      </form>
+          <input
+            type="text"
+            placeholder="ENTER_QUERY..."
+            className="cyber-input"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
 
+          <button type="submit" className="cyber-button">
+            <span>EXECUTE</span>
+          </button>
+        </form>
+      </div>
+
+      {/* Category Cards */}
+      <div className="cyber-categories">
+        <div className="category-card" onClick={() => setTableCategory("Artists")}>
+          <div className="card-inner">
+            <span className="card-number">01</span>
+            <span className="card-title">ARTISTS</span>
+            <div className="card-glow"></div>
+          </div>
+        </div>
+        
+        <div className="category-card" onClick={() => setTableCategory("Songs")}>
+          <div className="card-inner">
+            <span className="card-number">02</span>
+            <span className="card-title">SONGS</span>
+            <div className="card-glow"></div>
+          </div>
+        </div>
+        
+        <div className="category-card" onClick={() => setTableCategory("Albums")}>
+          <div className="card-inner">
+            <span className="card-number">03</span>
+            <span className="card-title">ALBUMS</span>
+            <div className="card-glow"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Results Display - Keep your existing logic but with new styling */}
       {results.length > 0 && (
-        <div className="search-results">
-          <h2>Results:</h2>
-          <ul>
+        <div className="cyber-results">
+          <h2 className="results-header">
+            <span className="results-icon">▶</span> DATA_RETRIEVED
+          </h2>
+          <div className="results-grid">
             {results.map((item, index) => (
-              <li 
-                key={index} 
-                onClick={() => {
-                  if (selectedCategory === 'songs') {
-                    handleSongClick(item.spotify_id);
-                  } else if (selectedCategory === 'albums') {
-                    handleAlbumClick(item.Album_ID);
-                  } else if (selectedCategory === 'artists') {
-                    handleArtistClick(item.Artist_ID);
-                  }
-                }}
-                style={{ cursor: (selectedCategory === 'songs' || selectedCategory === 'albums' || selectedCategory === 'artists') ? 'pointer' : 'default' }}
-              >
-                {selectedCategory === "songs" && (
-                  <>
-                    <strong>{item.artist_name}</strong> — {item.song_title}
-                    <br />
-                    <span className="album-info">Album: {item.album_name}</span>
-                  </>
-                )}
-
-                {selectedCategory === "albums" && (
-                  <>
-                    <strong>{item.album_name}</strong>
-                    <br />
-                    <span className="album-info">By: {item.artist_name}</span>
-                  </>
-                )}
-                {selectedCategory === "artists" && (
-                  <>
-                    <strong>{item.artist_name}</strong>
-                    <br />
-                    <span className="album-info">Genre: {item.genre}</span>
-                  </>
-                )}
-              </li>
+              <div key={index} className="result-card">
+                {/* Keep your existing result display logic */}
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
-      <h1 className="home-title">Welcome to MusicBox!</h1>
-      <p className="home-subtitle">Please select an option you would like to rate:</p>
-
-      <div className="button-group">
-        <button className="category-button" onClick={() => setTableCategory("Artists")}>Artists</button>
-        <button className="category-button" onClick={() => setTableCategory("Songs")}>Songs</button>
-        <button className="category-button" onClick={() => setTableCategory("Albums")}>Albums</button>
+      {/* Table - wrapped in cyber styling */}
+      <div className="cyber-table-container">
+        <Table tableCategory={tableCategory} />
       </div>
-
-      <Table tableCategory={tableCategory} />
     </div>
+  );
+    </motion.div>
   );
 }
 
