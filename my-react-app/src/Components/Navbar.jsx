@@ -5,7 +5,7 @@ export function Navbar() {
     return (
         <div className="nav-container">
             <div className="nav-header">
-                <div className="nav-logo">MX</div>
+                <div className="nav-logo">MP</div>
                 <div className="nav-status">ONLINE</div>
             </div>
             
