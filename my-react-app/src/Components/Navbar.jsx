@@ -4,17 +4,35 @@ import '../CSS/NavBar.css'
 export function Navbar() {
     return (
         <div className="nav-container">
-            <Link to="/home">
-                <button className="NavBarButtons">🏠</button>
-            </Link>
-            <Link to="/Profile">
-                <button className="NavBarButtons">👤</button>
-            </Link>
-            <Link to="/top-rated-albums">
-                <button className="NavBarButtons">Top Rated Albums</button>
-            </Link>
-            <Link to="/">
-                <button className="NavBarButtons">Logout</button>
+            <div className="nav-header">
+                <div className="nav-logo">MX</div>
+                <div className="nav-status">ONLINE</div>
+            </div>
+            
+            <div className="nav-links">
+                <Link to="/home" className="nav-link">
+                    <span className="nav-icon">⟨/⟩</span>
+                    <span className="nav-text">HOME</span>
+                    <span className="nav-line"></span>
+                </Link>
+                
+                <Link to="/Profile" className="nav-link">
+                    <span className="nav-icon">◈</span>
+                    <span className="nav-text">PROFILE</span>
+                    <span className="nav-line"></span>
+                </Link>
+                
+                <Link to="/top-rated-albums" className="nav-link">
+                    <span className="nav-icon">▲</span>
+                    <span className="nav-text">TOP_RATED</span>
+                    <span className="nav-line"></span>
+                </Link>
+            </div>
+            
+            <Link to="/" className="nav-link logout">
+                <span className="nav-icon">⬡</span>
+                <span className="nav-text">LOGOUT</span>
+                <span className="nav-line"></span>
             </Link>
         </div>
     );
