@@ -82,13 +82,13 @@
 }
 
 .glitch::before {
-  animation: glitch-1 0.5s infinite;
+  animation: glitch-1 1s infinite;
   color: #FF10F0;
   z-index: -1;
 }
 
 .glitch::after {
-  animation: glitch-2 0.5s infinite;
+  animation: glitch-2 1s infinite;
   color: #00FFF0;
   z-index: -2;
 }

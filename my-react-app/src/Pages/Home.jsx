@@ -61,7 +61,7 @@ function Home() {
       
       {/* Hero Section */}
       <div className="cyber-hero">
-        <div className="glitch" data-text="MUSICB0X">MUSICB0X</div>
+        <div className="glitch" data-text="MUSICPUNK">MUSICPUNK</div>
         <div className="hero-subtitle">
           <span className="cyber-text">NEURAL_MUSIC_INTERFACE_</span>
           <span className="blink">▮</span>
