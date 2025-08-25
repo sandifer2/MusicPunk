@@ -3,6 +3,7 @@
 
 
 A music review application project with the intent of turning a barely working school project into a dynamic full-stack app with React, FastAPI, PostgreSQL(hosted on AWS RDS) and Capacitor(future)
+This README is wildly innaccurate and will be updated in due time.
 ## Project Structure
 - this is currently being reworked and may be innaccurate
 ```
