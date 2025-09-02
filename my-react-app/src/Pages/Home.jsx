@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom"
 import Table from "./Table";
 import '../CSS/Home.css'
-import { motion } from 'framer-motion'
+
 
 
 function Home() {
@@ -11,6 +11,7 @@ function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState([]);
   const [tableCategory, setTableCategory] = useState("");
+  const [showFade, setShowFade] = useState(true);
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -46,14 +47,14 @@ function Home() {
   const handleArtistClick = (artistId) => {
     navigate(`/artist/${artistId}`);
   };
+  
+
+
+
+    
+  
 
   return (
-    <motion.div
-    initial={{ opacity: 0}}
-    animate ={{opacity: 1}}
-    exit = {{opacity: 0}}
-    transition = {{ duration: 1}}
-    >
       <div className="home-container">
       {/* Cyberpunk Background Effects */}
       <div className="cyber-grid"></div>
@@ -153,8 +154,7 @@ function Home() {
       </div>
     </div>
   );
-    </motion.div>
-  );
+
 }
 
 export default Home;
