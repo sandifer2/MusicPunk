@@ -188,7 +188,6 @@ async def refresh_token(
 ):
     '''
     Refresh Token Endpoint for when access (15 min) token expires but refresh(7 days) is active
-    CRITICAL TODO: get new access token (15 minute one)
     '''
 
     payload = TokenManager.verify_token(refresh_token, token_type="refresh")
